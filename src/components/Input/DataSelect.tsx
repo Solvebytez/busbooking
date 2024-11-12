@@ -48,7 +48,7 @@ export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className
           )}
         >
           <CalendarIcon className="mr-2 h-6 w-6 text-primary" />
-          <div className="flex flex-col gap-[2px]">
+          <div className="flex flex-col gap-[2px] text-red-600">
           <span className="text-gray-500 text-xs">
          {textLabel1}
         </span>

@@ -71,7 +71,7 @@ const TicketBookingForm = () => {
   const toCity = watch("toCity");
   const departureDate = watch("departureDate");
   const returnDate = watch("returnDate");
-   const isSignleLady = watch("isSignleLady");
+  // const isSignleLady = watch("isSignleLady");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setCustomValue = (name: any, value: unknown) => {
@@ -96,9 +96,9 @@ const TicketBookingForm = () => {
 
   const handleCheckboxChange = () => {
     console.log("Single Lady changed:", singleLady);  
-    // setIsSignleLady((prev) => !prev);
+     setIsSignleLady((prev) => !prev);
     // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
-    // setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
+     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
 
   return (

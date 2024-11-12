@@ -41,7 +41,7 @@ const SearchableDropdown = ({ cities,values,OnChange,lebelText1,labelText2 }:{ci
   );
 
   return (
-    <div className="relative w-[18rem]">
+    <div className="relative w-full">
       {/* Dropdown Toggle */}
       <div
         onClick={() => setShowDropdown(!showDropdown)}

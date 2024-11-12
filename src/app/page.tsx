@@ -10,7 +10,7 @@ export default function Home() {
     <div className="">
      <div className="relative">
         <SliderBanner/>
-       <div className="absolute bottom-[3%] left-[12.4rem]">
+       <div className="absolute bottom-[3%] px-[0%] md:px-[0%] xl:px-[4%] 2xl:px-[7%] w-full">
        <TicketBookingForm/>
        </div>
      </div>

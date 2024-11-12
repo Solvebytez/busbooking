@@ -10,8 +10,7 @@ import SubmitButton from "../Global/SubmitButton";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox"
-
+import { Checkbox } from "@/components/ui/checkbox";
 
 const cities: CityPropsType[] = [
   { value: "2568", label: "Aatingal", datakey: "AAT" },
@@ -95,23 +94,28 @@ const TicketBookingForm = () => {
   };
 
   const handleCheckboxChange = () => {
-    console.log("Single Lady changed:", singleLady);  
-     setIsSignleLady((prev) => !prev);
+    console.log("Single Lady changed:", singleLady);
+    setIsSignleLady((prev) => !prev);
     // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
-     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
+    setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
 
   return (
-    <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative">
+    <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
       <div className="flex absolute -top-[40px] left-0">
         <div className="bg-white  px-5 py-2 rounded-tl-md">
-          <h2 className="text-md font-bold flex items-center gap-1">  <Bus size={18} /> Bus Ticket Booking</h2>
+          <h2 className="text-md font-bold flex items-center gap-1">
+            {" "}
+            <Bus size={18} /> Bus Ticket Booking
+          </h2>
         </div>
         <div className="bg-primary text-white px-5 py-2 rounded-tr-md">
-          <h2 className="text-md font-bold flex items-center gap-1"><Luggage size={18} /> Package Tour Booking</h2>
+          <h2 className="text-md font-bold flex items-center gap-1">
+            <Luggage size={18} /> Package Tour Booking
+          </h2>
         </div>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <RadioGroup
           {...register("tripType")}
           defaultValue={tripTypeValue}
@@ -136,8 +140,8 @@ const TicketBookingForm = () => {
             </div>
           </div>
         </RadioGroup>
-        <div className="flex gap-4 items-center h-[3.7rem]">
-          <div className="flex gap-4 relative">
+        <div className="flex  gap-4 items-center h-[3.7rem] w-full">
+          <div className="flex gap-4 relative xl:w-[37%]">
             <SearchableSelect
               cities={cities}
               values={fromCity}
@@ -147,7 +151,7 @@ const TicketBookingForm = () => {
               lebelText1="Select Departure City"
               labelText2="Leaving From"
             />
-            <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[17rem] z-10 top-[6px]">
+            <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[45%] z-10 top-[6px]">
               <ArrowRightLeft size={20} className="text-primary" />
             </div>
             <SearchableSelect
@@ -160,12 +164,12 @@ const TicketBookingForm = () => {
               labelText2="Going To"
             />
           </div>
-          <div className="">
+          <div className="flex gap-0 xl:w-[37%]">
             <DatePickerWithTwoMonths
               textLabel1="Date of Departure"
               textLabel2="Choose Date"
               value={departureDate ? departureDate : undefined}
-              className="h-[3.7rem]"
+              className="h-[3.7rem] w-[50%]"
               onChange={(value: Date | undefined) =>
                 setCustomValue("departureDate", value)
               }
@@ -176,27 +180,28 @@ const TicketBookingForm = () => {
               textLabel1="Return Date"
               textLabel2="Choose Date (Optional)"
               value={returnDate}
-              className="h-[3.7rem]"
+              className="h-[3.7rem] w-[50%]"
               onChange={(value: Date | undefined) =>
                 setCustomValue("returnDate", value)
               }
             />
           </div>
-          <div className="border border-gray-600 rounded-lg h-full flex flex-col items-center">
-          <div className="items-center flex space-x-2 h-full justify-center px-5">
-      <Checkbox id="terms1" onChange={handleCheckboxChange} />
-      <div className="grid gap-1.5 leading-none">
-        <label
-          htmlFor="terms1"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Single Lady
-        </label>
-       
-      </div>
-    </div>
+          <div className=" h-full flex gap-4 items-center w-[26%]">
+            <div className="items-center flex space-x-2 h-full justify-center px-5 border border-gray-600 rounded-lg w-[50%]">
+              <Checkbox id="terms1" onChange={handleCheckboxChange} />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="terms1"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Single Lady
+                </label>
+              </div>
+            </div>
+            <div className="items-center flex h-full justify-center  w-[50%]">
+              <SubmitButton btnText={"Submit"} className="h-full font-bold w-full" />
+            </div>
           </div>
-          <SubmitButton btnText={"Submit"} className="h-full font-bold" />
         </div>
       </form>
     </div>

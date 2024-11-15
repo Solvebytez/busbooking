@@ -12,7 +12,7 @@ const FilterComponent: React.FC = () => {
   const [showServiceClass, setShowServiceClass] = useState(false);
   const [showBoardingPoints, setShowBoardingPoints] = useState(false);
   const [showDropingPoints, setShowDropingPoints] = useState(false);
-  const [pricevalue, setPriceValue] = useState([30, 60]);
+  const [pricevalue] = useState([30, 60]);
 
   const busTypes: FilterOption[] = ['AC', 'Non AC', 'Seater', 'Sleeper'];
   const departureTimes: FilterOption[] = ['Before-10AM', '10AM - 5PM', '5PM-11PM', 'After-11PM'];

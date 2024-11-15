@@ -11,7 +11,7 @@ type buttonProps = {
 }
 const SubmitButton = ({btnText,className,isDisabled,isPending,onClick}:buttonProps) => {
   return (
-    <Button onClick={()=>onClick} variant="default" size="lg" className={cn("bg-primary", className)} disabled={isPending||isDisabled}>
+    <Button onClick={()=>onClick} variant="default" size="lg" className={cn("bg-primary font-bold text-xl", className)} disabled={isPending||isDisabled}>
         {isPending? <LoaderCircle size={18} className="text-white animate-spin" />:btnText }
         </Button>
   )

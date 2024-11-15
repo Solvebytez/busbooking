@@ -21,15 +21,16 @@ interface DatePickerWithTwoMonthsProps {
   value: Date|undefined;
   textLabel1?:string;
   textLabel2?:string;
-
+  isError?:string
 }
 
 
-export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className,disabled,onChange,value}:DatePickerWithTwoMonthsProps) {
+export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className,disabled,onChange,value,isError}:DatePickerWithTwoMonthsProps) {
   const [date, setDate] = React.useState<Date|undefined>(value)
   const [isOpen, setIsOpen] = React.useState(false)
 
   const handleSelect = (selectedDate: Date | undefined) => {
+    console.log("Selected date:", selectedDate)
     setDate(selectedDate)
     onChange(selectedDate)
     setIsOpen(false)
@@ -45,12 +46,13 @@ export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className
             "w-[280px] justify-start text-left font-normal border-gray-600",
             !date && "text-muted-foreground", className,
             textLabel1 ==='Return Date'&& "text-red-600",
+            isError && "text-red-600 border-red-600",
           )}
         >
           <CalendarIcon className="mr-2 h-6 w-6 text-primary" />
           <div className="flex flex-col gap-[2px] text-red-600">
-          <span className="text-gray-500 text-xs">
-         {textLabel1}
+          <span className={cn("text-gray-500 text-xs", isError && "text-red-600",)}>
+         {textLabel1} {isError && "- Required*"}
         </span>
           {date ? format(date, "PPP") : <span className="font-bold">{textLabel2}</span>}
           </div>

@@ -1,18 +1,20 @@
 'use client'
 import { cn } from '@/lib/utils';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AiOutlineSearch, AiOutlineClose } from 'react-icons/ai';
 
 export type CityPropsType={ 
     value: string; 
     label: string; 
-    datakey: string 
+    datakey: string;   
 }
 
-const SearchableDropdown = ({ cities,values,OnChange,lebelText1,labelText2 }:{cities:CityPropsType[];values:string;OnChange:(val:string)=>void;lebelText1:string;labelText2:string}) => {
+const SearchableDropdown = ({ cities,values,OnChange,lebelText1,labelText2, isError }
+  :{cities:CityPropsType[];values:string;OnChange:(val:string)=>void;lebelText1:string;labelText2:string; isError?:string}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState(values);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
 //   const cities = [
 //     "Aatingal", "Achampet", "Adoni", "Afzalpur", "Agumbe",
@@ -40,15 +42,29 @@ const SearchableDropdown = ({ cities,values,OnChange,lebelText1,labelText2 }:{ci
     city.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleClickOutside = (event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setShowDropdown(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="relative w-full">
       {/* Dropdown Toggle */}
       <div
+      ref={dropdownRef}
         onClick={() => setShowDropdown(!showDropdown)}
-        className={cn("flex flex-col items-start  border border-gray-600 rounded-lg p-2 cursor-pointer h-[3.7rem] pl-2",labelText2==="Going To"?'pl-8':'')}
+        className={cn("flex flex-col items-start bg-white border border-gray-600 rounded-lg p-2 cursor-pointer h-[3.7rem] pl-2",labelText2==="Going To"?'pl-8':'', isError && "text-red-600 border-red-600",)}
       >
-         <span className="text-gray-500 text-xs">
-         {labelText2}
+         <span className={cn("text-gray-500 text-xs", isError && "text-red-600",)}>
+         {labelText2}  {isError && "- Required*"}
         </span>
         <span className="text-gray-900 w-[150px] line-clamp-1">
           {values || lebelText1}
@@ -59,7 +75,7 @@ const SearchableDropdown = ({ cities,values,OnChange,lebelText1,labelText2 }:{ci
       {selectedCity && (
           <AiOutlineClose
             onClick={clearSelection}
-            className="text-gray-500 cursor-pointer ml-2"
+            className="text-gray-500 cursor-pointer ml-2 hidden"
           />
         )}
       {/* Dropdown Menu */}

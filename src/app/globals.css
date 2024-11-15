@@ -11,10 +11,10 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 3.4 80.3% 53.3%; /* Updated color */
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --primary: 15.6 90% 45%; /* #cd4a0c in HSL */
+    --primary-foreground: 0 0% 100%; /* White for contrast */
+    --secondary: 194.8 56.5% 24.1%; /* #1d5562 in HSL */
+    --secondary-foreground: 0 0% 100%; /* White for contrast */
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 4.8% 95.9%;
@@ -23,7 +23,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 3.4 80.3% 53.3%; /* Updated color */
+    --ring: 15.6 90% 45%; /* Same as primary color */
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -39,10 +39,10 @@
     --card-foreground: 0 0% 95%;
     --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
-    --primary: 3.4 80.3% 53.3%; /* Updated color */
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --primary: 15.6 90% 45%; /* #cd4a0c in HSL */
+    --primary-foreground: 0 0% 100%; /* White for contrast */
+    --secondary: 194.8 56.5% 24.1%; /* #1d5562 in HSL */
+    --secondary-foreground: 0 0% 100%; /* White for contrast */
     --muted: 0 0% 15%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 12 6.5% 15.1%;
@@ -51,7 +51,7 @@
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 3.4 80.3% 53.3%; /* Updated color */
+    --ring: 15.6 90% 45%; /* Same as primary color */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -59,7 +59,6 @@
     --chart-5: 340 75% 55%;
   }
 }
-
 
 @layer base {
   * {
@@ -93,4 +92,54 @@
 .bannerSlide .slick-dots li.slick-active button
 {
   border: 1px solid #E23229;
+}
+
+.marquee-container {
+  height: 30px;
+  overflow: hidden;
+  line-height: 30px;
+}
+.marquee-container .marquee {
+  top: 0;
+  left: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  animation: marquee 40s linear infinite;
+}
+.marquee-container .marquee2 {
+  animation-delay: 20s;
+}
+.marquee-container b {
+  padding-left: 10px;
+}
+
+@keyframes marquee {
+  0% {
+    left: 100%;
+  }
+  100% {
+    left: -100%;
+  }
+}
+
+/* Range Slider as a Single Thumb Slider */
+.single-thumb .range-slider__thumb[data-lower] {
+  width: 0;
+}
+.single-thumb .range-slider__range {
+  border-radius: 6px;
+}
+
+/* Vertical Range Slider */
+.vertical-slider[data-vertical] {
+  height: 180px;
+}
+.range-slider {
+  background: #1d5562!important;
+}
+
+.range-slider .range-slider__thumb,.range-slider .range-slider__range {
+  background: #cd4a0c!important;
 }

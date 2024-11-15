@@ -1,23 +1,12 @@
 import type { Metadata } from "next";
-// import localFont from "next/font/local";
-import { Montserrat } from 'next/font/google'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {Lato } from 'next/font/google'
 import "./globals.css";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 
-const space_Grotesk = Montserrat({ subsets: ['latin','latin-ext','vietnamese'], variable: '--font-space-montserrat', })
-
-// const geistSans = localFont({
-//   src: "./fonts/GeistVF.woff",
-//   variable: "--font-geist-sans",
-//   weight: "100 900",
-// });
-// const geistMono = localFont({
-//   src: "./fonts/GeistMonoVF.woff",
-//   variable: "--font-geist-mono",
-//   weight: "100 900",
-// });
-
+const space_Grotesk = Lato({ subsets: ['latin','latin-ext'], weight:["400","700","300","900"],variable: "--font-space-grotesk" })
 
 
 export const metadata: Metadata = {
@@ -37,7 +26,9 @@ export default function RootLayout({
       >
         <Header/>
         {children}
+       
         <Footer/>
+        <ToastContainer />
       </body>
     </html>
   );

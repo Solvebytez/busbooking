@@ -3,41 +3,66 @@ import Conatiner from "../Global/Conatiner";
 import Link from "next/link";
 import Image from "next/image";
 
-const navigation = [
-  { label: "Home", url: "/" },
-  { label: "About Us", url: "/about-us" },
-  { label: "Packages", url: "/packages" },
-  { label: "Ticket Search", url: "/ticket-search" },
-  { label: "Contact Us", url: "/contact-us" },
+// const navigation = [
+//   { label: "Home", url: "/" },
+//   { label: "About Us", url: "/about-us" },
+//   { label: "Packages", url: "/packages" },
+//   { label: "Ticket Search", url: "/ticket-search" },
+//   { label: "Contact Us", url: "/contact-us" },
+// ];
+
+const column2=[
+  { label: 'Operator/Agent Login', url: '/operator-login' },
+  { label: 'Book a Bus', url: '/book-bus' },
+  { label: 'Contact Us', url: '/contact-us' },
+]
+
+const column3 = [
+  { label: 'About Us', url: '/about-us' },
+  { label: 'Bus Services', url: '/bus-services' },
+  { label: 'Key Statistics', url: '/key-statistics' },
+  { label: 'Passenger Safety', url: '/passenger-safety' },
 ];
 
-const socialMediaLinks = [
-  {
-    label: "YouTube",
-    imageUrl: "https://busbooking.one67.in/public/frontend/images/yt.svg",
-  },
-  {
-    label: "Facebook",
-    imageUrl: "https://busbooking.one67.in/public/frontend/images/fb.svg",
-  },
-  {
-    label: "LinkedIn",
-    imageUrl: "https://busbooking.one67.in/public/frontend/images/linkedin.svg",
-  },
-  {
-    label: "Instagram",
-    imageUrl: "https://busbooking.one67.in/public/frontend/images/insta.svg",
-  },
+const column4 = [
+  { label: 'Package Tour', url: '/package-tour' },
+  { label: 'Hotel Booking', url: '/hotel-booking' },
+  { label: 'Flight Booking', url: '/flight-booking' },
+  { label: 'Membership', url: '/membership' },
 ];
+
+// const socialMediaLinks = [
+//   {
+//     label: "YouTube",
+//     imageUrl: "https://busbooking.one67.in/public/frontend/images/yt.svg",
+//   },
+//   {
+//     label: "Facebook",
+//     imageUrl: "https://busbooking.one67.in/public/frontend/images/fb.svg",
+//   },
+//   {
+//     label: "LinkedIn",
+//     imageUrl: "https://busbooking.one67.in/public/frontend/images/linkedin.svg",
+//   },
+//   {
+//     label: "Instagram",
+//     imageUrl: "https://busbooking.one67.in/public/frontend/images/insta.svg",
+//   },
+// ];
 
 const Footer = () => {
   return (
-    <div className="bg-black">
+    <div className="bg-secondary">
       <Conatiner>
-        <div className="grid grid-cols-12 py-[5rem] text-white gap-7">
-          <div className="col-span-4">
-            <h2 className="font-bold text-xl mb-4">Connect with Us</h2>
+        <div className="grid grid-cols-12 py-[5rem] text-white gap-2">
+          <div className="col-span-3">
+            <h2 className="font-bold text-xl mb-4">
+              <Image alt="site logo" src='/logo.png' width={120} height={200} priority />
+            </h2>
             <div className="space-y-3 text-md">
+              {/* <p className="text-sm">
+              Sanchar6t, under the leadership of proprietor Nagesh K N, is a distinguished service provider in the realms of bus booking and tourism, renowned for its specialization in Tirupati Balaji and special darshan packages.
+              </p> */}
               <p className="flex gap-1 items-center text-primary-foreground/50">
                 {" "}
                 <Phone size={13} className="text-primary" /> +91 97313 12275
@@ -54,10 +79,10 @@ const Footer = () => {
               </p>
             </div>
           </div>
-          <div className="col-span-4">
+          <div className="col-span-3">
             <h2 className="font-bold text-xl mb-4">Quick Links</h2>
             <ul className="space-y-2">
-              {navigation.map((item, index) => (
+              {column2.map((item, index) => (
                 <li key={index} className="">
                   <Link
                     href={item.url}
@@ -71,22 +96,32 @@ const Footer = () => {
               ))}
             </ul>
           </div>
-          <div className="col-span-4">
+          <div className="col-span-3">
             <h2 className="font-bold text-xl mb-4">Social Media Update</h2>
             <ul className="space-y-2">
-              {socialMediaLinks.map((item, index) => (
+              {column3.map((item, index) => (
                 <li key={index} className="">
                   <Link
                     href={item.label}
                     className="text-primary-foreground/50 hover:text-primary-foreground flex gap-2 items-center"
                   >
-                    {" "}
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.label}
-                      width={15}
-                      height={15}
-                    />{" "}
+                    {" "}<ChevronRight size={15} className="text-primary" />{" "}
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-span-3">
+            <h2 className="font-bold text-xl mb-4">Social Media Update</h2>
+            <ul className="space-y-2">
+              {column4.map((item, index) => (
+                <li key={index} className="">
+                  <Link
+                    href={item.label}
+                    className="text-primary-foreground/50 hover:text-primary-foreground flex gap-2 items-center"
+                  >                   
+                    {" "}<ChevronRight size={15} className="text-primary" />{" "}
                     {item.label}
                   </Link>
                 </li>

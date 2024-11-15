@@ -5,12 +5,13 @@ import SearchableSelect, {
 } from "@/components/Input/SelectInput";
 import { useForm } from "react-hook-form";
 import DatePickerWithTwoMonths from "../Input/DataSelect";
-import { ArrowRightLeft, Bus, Luggage } from "lucide-react";
+import { ArrowRightLeft, Bus, CircleAlert, Luggage } from "lucide-react";
 import SubmitButton from "../Global/SubmitButton";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
 
 const cities: CityPropsType[] = [
   { value: "2568", label: "Aatingal", datakey: "AAT" },
@@ -56,12 +57,14 @@ type TicketBookingFormProps = {
 const TicketBookingForm = () => {
   const [tripTypeValue, setTripTypeValue] = useState<string>(TripType.one_way);
   const [singleLady, setIsSignleLady] = useState<boolean>(false);
-  const { handleSubmit, setValue, watch, register } =
+  const { handleSubmit, setValue, watch, register,formState:{errors,isSubmitted}   } =
     useForm<TicketBookingFormProps>({
       defaultValues: {
         fromCity: "",
         toCity: "",
-        tripType: "",
+        tripType: TripType.one_way,
+        departureDate:undefined,
+        returnDate:undefined,
         isSignleLady: false,
       },
     });
@@ -83,9 +86,26 @@ const TicketBookingForm = () => {
     console.log("Custom value changed:", name, value);
   };
 
+ 
+
   const onSubmit = (data: TicketBookingFormProps) => {
+
     console.log("Form submitted:", data);
+   
   };
+
+  useEffect(() => {
+    if (isSubmitted && errors) {
+      Object.values(errors).forEach((error) => {
+        if (error?.message) {
+          toast.error(error.message as string,{
+            icon:<CircleAlert className="text-red-600" />,
+            className:'text-red-600'
+          }); // Display error message in toast
+        }
+      });
+    }
+  }, [errors, isSubmitted]);
 
   const tripTypeHandler = (val: string) => {
     console.log("Trip Type Changed:", val);
@@ -141,15 +161,18 @@ const TicketBookingForm = () => {
           </div>
         </RadioGroup>
         <div className="flex  gap-4 items-center h-[3.7rem] w-full">
-          <div className="flex gap-4 relative xl:w-[37%]">
-            <SearchableSelect
+          <div className="flex flex-col xl:w-[37%]">
+      <div className="flex gap-4 relative xl:w-[100%]">
+      <SearchableSelect
               cities={cities}
               values={fromCity}
+              isError={errors?.fromCity?.message}
               OnChange={(value: string | null) =>
                 setCustomValue("fromCity", value)
               }
               lebelText1="Select Departure City"
               labelText2="Leaving From"
+              {...register("fromCity", { required: "Departure city is required*" })}
             />
             <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[45%] z-10 top-[6px]">
               <ArrowRightLeft size={20} className="text-primary" />
@@ -157,34 +180,47 @@ const TicketBookingForm = () => {
             <SearchableSelect
               cities={cities}
               values={toCity}
+              isError={errors?.toCity?.message}
               OnChange={(value: string | null) =>
                 setCustomValue("toCity", value)
               }
+              {...register("toCity", { required: "To city is required" })}
               lebelText1="Select Destination City"
               labelText2="Going To"
             />
+      </div>
+          
+            
           </div>
           <div className="flex gap-0 xl:w-[37%]">
             <DatePickerWithTwoMonths
               textLabel1="Date of Departure"
               textLabel2="Choose Date"
+              {...register("departureDate", { required: "Departure date is required" })}
               value={departureDate ? departureDate : undefined}
               className="h-[3.7rem] w-[50%]"
+              isError={errors?.departureDate?.message}
               onChange={(value: Date | undefined) =>
                 setCustomValue("departureDate", value)
               }
+              
             />
 
             <DatePickerWithTwoMonths
               disabled={tripTypeValue == TripType.one_way}
               textLabel1="Return Date"
               textLabel2="Choose Date (Optional)"
+              {...register("returnDate", {
+                required: tripTypeValue === TripType.round_trip ? "Return date is required for round trips" : false,
+              })}
+              isError={errors?.returnDate?.message}
               value={returnDate}
               className="h-[3.7rem] w-[50%]"
               onChange={(value: Date | undefined) =>
                 setCustomValue("returnDate", value)
               }
             />
+          
           </div>
           <div className=" h-full flex gap-4 items-center w-[26%]">
             <div className="items-center flex space-x-2 h-full justify-center px-5 border border-gray-600 rounded-lg w-[50%]">
@@ -204,6 +240,8 @@ const TicketBookingForm = () => {
           </div>
         </div>
       </form>
+     
+    
     </div>
   );
 };

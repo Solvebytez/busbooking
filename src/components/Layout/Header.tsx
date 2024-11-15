@@ -40,7 +40,7 @@ const Header = () => {
   return (
     <header  className={cn("fixed top-0 left-0 z-10 w-full duration-300 ease-in-out",isSticky?"-translate-y-11":"translate-y-0")}>
         <InfoBar />
-      <nav className={cn("flex flex-wrap items-center justify-between w-full bg-white/50 backdrop-blur-lg py-3 border-b border-gray-400",)}>
+      <nav className={cn("flex flex-wrap items-center justify-between w-full bg-white/50 backdrop-blur-lg py-3 border-b border-gray-200",)}>
         <Conatiner className="">
           <div className="flex flex-wrap items-center justify-between w-full">
             <div>
@@ -95,7 +95,7 @@ const Header = () => {
                 }               
                 <li>
                   <Link
-                    className=" px-4 py-[7px] hover:text-muted-foreground bg-foreground text-primary text-sm font-bold rounded flex gap-1 items-center justify-center "
+                    className=" px-4 py-[7px] hover:text-muted-foreground bg-secondary text-white text-sm font-bold rounded flex gap-1 items-center justify-center "
                     href="#"
                   >
                     <UsersRound size={14} /> Sign Up

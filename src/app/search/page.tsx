@@ -1,11 +1,13 @@
 
 import SearchResultConatiner from '@/components/SearchPageUI/SearchResultConatiner'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const Searchpage = () => {
   return (
     <div className='bg-[#f5f5f5]'>
-        <SearchResultConatiner/>
+       <Suspense fallback={"Loading..."}>
+       <SearchResultConatiner/>
+       </Suspense>
     </div>
   )
 }

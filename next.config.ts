@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'busbooking.one67.in',
       },
+      {
+        protocol: 'https',
+        hostname: 'crs-cargo-proof.s3-ap-southeast-1.amazonaws.com',
+      },
     ]
   }
 };

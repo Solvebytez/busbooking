@@ -143,3 +143,20 @@
 .range-slider .range-slider__thumb,.range-slider .range-slider__range {
   background: #cd4a0c!important;
 }
+
+.slick-prev:before, .slick-next:before {
+  color: hsl(var(--primary) / 0.9)!important;
+}
+
+.afterEffect::after {
+  content: '';
+  display: block;
+  position: absolute;
+  right: 0px;
+  top: 3px;
+  bottom: 3px;
+  left: initial;
+  width: 5px;
+  height: initial;
+  background: rgb(30, 178, 75);
+}

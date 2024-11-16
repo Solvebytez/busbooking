@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import TripFilterHeader from "./TripFilterHeader";
 import SearchForm from "./SearchForm";
 import SidebarFilter from "./SidebarFilter";
-import { ChevronDown, ChevronUp, ScreenShare } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import AdditionalBusInfo from "./SearchAdditionalComp/AdditionalBusInfo";
 import { cn } from "@/lib/utils";
 import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";

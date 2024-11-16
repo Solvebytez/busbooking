@@ -80,7 +80,7 @@ const AllSelectInput = ({ countryPhoneCodes,values,OnChange,lebelText1, isError,
       }}
         
         className={cn("flex flex-col items-start bg-white border border-gray-600 rounded-lg p-1 cursor-pointer h-[3rem] pl-2", 
-            isError && "text-red-600 border-red-600",isDisabled&&"cursor-not-allowed bg-grey ")}
+            isError && "text-red-600 border-red-600",isDisabled&&"cursor-not-allowed bg-gray-500/15 ")}
       >
          {/* <span className={cn("text-gray-500 text-xs", isError && "text-red-600",)}>
          {labelText2}  {isError && "- Required*"}

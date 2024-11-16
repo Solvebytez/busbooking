@@ -106,7 +106,7 @@ const Passenger_DetailForm = () => {
           <AllSelectInput
             OnChange={() => {}}
             countryPhoneCodes={genederDetails}
-            lebelText1="Select Gender"
+            lebelText1="India"
             values=""
             isDisabled={true}
           />

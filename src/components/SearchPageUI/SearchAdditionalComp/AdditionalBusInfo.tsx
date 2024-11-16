@@ -181,7 +181,7 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
                 <TabsTrigger
                   value="Customer Details"
                   className={cn(
-                    "text-lg data-[state=active]:bg-primary data-[state=active]:text-white"
+                    "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
                   )}
                 >
                   Customer Details
@@ -189,7 +189,7 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
                 <TabsTrigger
                   value="Passenger Detail"
                   className={cn(
-                    "text-lg data-[state=active]:bg-primary data-[state=active]:text-white"
+                    "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
                   )}
                 >
                   Passenger Detail

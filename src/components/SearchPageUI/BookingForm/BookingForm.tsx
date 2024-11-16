@@ -66,7 +66,7 @@ const BookingForm = ({onClick}:{onClick:()=>void}) => {
           onClick={onClick}
           variant={"default"}
           size={"lg"}
-          className="w-full text-xl h-14 mt-1"
+          className="w-full text-xl h-14 mt-1 font-bold"
         >
           Provide Passenger Details
         </Button>

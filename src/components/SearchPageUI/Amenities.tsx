@@ -20,7 +20,7 @@ export default function Amenities() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {amenities.map((amenity, index) => (
           <div key={index} className="flex items-center gap-3 text-gray-700">
-            {amenity.icon}
+            <span className='w-[30px] h-[30px] rounded-full bg-primary/10 flex items-center justify-center'>{amenity.icon}</span>
             <span className="text-sm">{amenity.label}</span>
           </div>
         ))}

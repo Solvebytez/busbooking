@@ -122,7 +122,7 @@ const SearchResultConatiner = () => {
                       <div key={item}>
                          {item!=='Select Berth'&& ( <button
                         onClick={() => handleClick(mainDivId.toString(), item)}
-                        className={cn('w-full text-left p-2 mb-2 flex gap-1 items-center justify-center text-secondary', openItems[mainDivId] === item&&"bg-secondary/10 font-semibold")}
+                        className={cn('w-full text-left py-2 px-4 mb-2 flex gap-0 items-center justify-center text-secondary bg-primary/5 rounded-2xl', openItems[mainDivId] === item&&"bg-secondary/10 font-semibold")}
                       >
                         {item} {openItems[mainDivId] === item ?<ChevronUp size={17} />:<ChevronDown size={17} />}
                       </button>)}

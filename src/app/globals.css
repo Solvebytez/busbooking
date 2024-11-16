@@ -146,6 +146,15 @@
 
 .slick-prev:before, .slick-next:before {
   color: hsl(var(--primary) / 0.9)!important;
+  font-size: 2rem!important;
+}
+
+.slick-prev{
+  left: -71px!important;
+}
+
+.slick-next{
+  right: -50px!important;
 }
 
 .afterEffect::after {

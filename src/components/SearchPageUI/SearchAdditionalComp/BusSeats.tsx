@@ -106,6 +106,10 @@ export default function Component() {
             <div className="w-4 h-4 bg-blue-500 rounded-sm" />
             <span>Selected</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-rose-500 rounded-sm" />
+            <span>Female</span>
+          </div>
         </div>
 
         {/* Selected seats summary */}

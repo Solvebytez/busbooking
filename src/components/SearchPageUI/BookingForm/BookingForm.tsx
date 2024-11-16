@@ -57,8 +57,8 @@ const BookingForm = ({onClick}:{onClick:()=>void}) => {
           <Clock size={15} /> 19:00 BALIJAKANDRIGA BUS STAND
         </div>
       </div>
-      <div className="absolute left-5 bottom-4">
-        <div className="text-[#777] italic">
+      <div className="absolute left-5 bottom-4 w-[91%]">
+        <div className="text-[#777] italic text-sm">
           Please select seat(s), pick up & drop off location to continue
         </div>
         <Button

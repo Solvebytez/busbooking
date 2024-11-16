@@ -6,6 +6,7 @@ import SidebarFilter from "./SidebarFilter";
 import { ChevronDown, ChevronUp, ScreenShare } from "lucide-react";
 import AdditionalBusInfo from "./SearchAdditionalComp/AdditionalBusInfo";
 import { cn } from "@/lib/utils";
+import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";
 
 export const options = [
   "Boarding Points",
@@ -47,7 +48,7 @@ const SearchResultConatiner = () => {
                      <div className="flex justify-start">
                   <div className="w-[34.5%]">
                     <h2 className="flex gap-2 text-primary/90 font-bold items-center text-xl">
-                      2001AGBBNG <ScreenShare size={20} />
+                      2001AGBBNG <BusInfoModal/>
                     </h2>
                   </div>
                   <div>
@@ -107,7 +108,7 @@ const SearchResultConatiner = () => {
                   </div>
                   <div className="w-[23%]">
                     <h2 className="font-bold items-center ">
-                      TIRTHAHALLI,SHIVAMOGGA
+                      TIRTHAHALLI, SHIVAMOGGA
                     </h2>
                   </div>
                   <div className="w-[15%] text-right text-lg">
@@ -122,7 +123,7 @@ const SearchResultConatiner = () => {
                       <div key={item}>
                          {item!=='Select Berth'&& ( <button
                         onClick={() => handleClick(mainDivId.toString(), item)}
-                        className={cn('w-full text-left py-2 px-4 mb-2 flex gap-0 items-center justify-center text-secondary bg-primary/5 rounded-2xl', openItems[mainDivId] === item&&"bg-secondary/10 font-semibold")}
+                        className={cn('w-full text-left text-sm py-2 px-4 mb-2 flex gap-0 items-center justify-center text-secondary bg-primary/5 rounded-2xl', openItems[mainDivId] === item&&"bg-secondary/10 font-semibold")}
                       >
                         {item} {openItems[mainDivId] === item ?<ChevronUp size={17} />:<ChevronDown size={17} />}
                       </button>)}

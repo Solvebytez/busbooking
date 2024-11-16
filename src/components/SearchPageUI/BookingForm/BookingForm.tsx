@@ -2,6 +2,7 @@
 import { Clock } from "lucide-react";
 import SelectLocationFromTo, { CityPropsType } from "./SelectLocationFromTo";
 import { Button } from "@/components/ui/button";
+import TotalFareDetails from "./TotalFareDetails";
 
 
 const cities: CityPropsType[] = [
@@ -58,7 +59,10 @@ const BookingForm = ({onClick}:{onClick:()=>void}) => {
         </div>
       </div>
       <div className="absolute left-5 bottom-4 w-[91%]">
-        <div className="text-[#777] italic text-sm">
+        <div className="flex w-full">
+        <TotalFareDetails/>
+        </div>
+        <div className="text-[#777] italic text-sm py-1">
           Please select seat(s), pick up & drop off location to continue
         </div>
         <Button

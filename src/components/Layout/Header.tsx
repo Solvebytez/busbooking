@@ -38,7 +38,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header  className={cn("fixed top-0 left-0 z-10 w-full duration-300 ease-in-out",isSticky?"-translate-y-11":"translate-y-0")}>
+    <header  className={cn("fixed top-0 left-0 z-20 w-full duration-300 ease-in-out",isSticky?"-translate-y-11":"translate-y-0")}>
         <InfoBar />
       <nav className={cn("flex flex-wrap items-center justify-between w-full bg-white/50 backdrop-blur-lg py-3 border-b border-gray-200",)}>
         <Conatiner className="">

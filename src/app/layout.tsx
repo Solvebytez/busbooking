@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import {Lato } from 'next/font/google'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Lato } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
+import QueryProvider from "./QueryProvider";
 
-const space_Grotesk = Lato({ subsets: ['latin','latin-ext'], weight:["400","700","300","900"],variable: "--font-space-grotesk" })
-
+const space_Grotesk = Lato({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "700", "300", "900"],
+  variable: "--font-space-grotesk",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,11 +28,13 @@ export default function RootLayout({
       <body
         className={`${space_Grotesk.className} ${space_Grotesk.variable}  antialiased pt-[120px] bg-[#f5f5f5]`}
       >
-        <Header/>
-        {children}
-       
-        <Footer/>
-        <ToastContainer />
+        <QueryProvider>
+          <Header />
+          {children}
+
+          <Footer />
+          <ToastContainer />
+        </QueryProvider>
       </body>
     </html>
   );

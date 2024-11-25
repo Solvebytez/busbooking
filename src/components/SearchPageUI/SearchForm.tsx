@@ -134,7 +134,7 @@ const SearchForm = () => {
           <div className="flex  gap-4 items-center h-[3.7rem] w-full">
             <div className="flex flex-col xl:w-[37%]">
               <div className="flex gap-4 relative xl:w-[100%]">
-                <SearchableSelect
+                {/* <SearchableSelect
                   cities={cities}
                   values={fromCity}
                   isError={errors?.fromCity?.message}
@@ -146,11 +146,11 @@ const SearchForm = () => {
                   {...register("fromCity", {
                     required: "Departure city is required*",
                   })}
-                />
+                /> */}
                 <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[46%] z-10 top-[6px]">
                   <ArrowRightLeft size={20} className="text-primary" />
                 </div>
-                <SearchableSelect
+                {/* <SearchableSelect
                   cities={cities}
                   values={toCity}
                   isError={errors?.toCity?.message}
@@ -160,7 +160,7 @@ const SearchForm = () => {
                   {...register("toCity", { required: "To city is required" })}
                   lebelText1="Select Destination City"
                   labelText2="Going To"
-                />
+                /> */}
               </div>
             </div>
             <div className="flex gap-0 xl:w-[37%]">

@@ -12,42 +12,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-toastify";
+import { useGetAllCities } from "@/ClientApi/cities";
+import { useRouter } from "next/navigation";
 
-const cities: CityPropsType[] = [
-  { value: "2568", label: "Aatingal", datakey: "AAT" },
-  { value: "9", label: "Achampet", datakey: "APT" },
-  { value: "4", label: "Adoni", datakey: "ADT" },
-  { value: "673", label: "Afzalpur", datakey: "AFZ" },
-  { value: "854", label: "Agumbe", datakey: "AGB" },
-  { value: "2826", label: "Ahmed Nagar", datakey: "AHN" },
-  { value: "810", label: "Ajjampura", datakey: "AJP" },
-  { value: "1513", label: "Alakkot", datakey: "AKK" },
-  { value: "1152", label: "Alamatti", datakey: "ATT" },
-  { value: "2943", label: "Alappuzha", datakey: "ALE" },
-  { value: "2573", label: "Alapuzha", datakey: "ALP" },
-  { value: "25", label: "Alike", datakey: "ALK" },
-  { value: "30", label: "Alleppey", datakey: "AVP" },
-  { value: "3047", label: "Alnavar", datakey: "LNR" },
-  { value: "29", label: "Aluva", datakey: "AWY" },
-  { value: "2574", label: "Alwaye", datakey: "ALW" },
-  { value: "2544", label: "Ambikanager", datakey: "AMB" },
-  { value: "3056", label: "Ambur", datakey: "ABR" },
-  { value: "962", label: "Amingad", datakey: "AMN" },
-  { value: "30", label: "Aminkot", datakey: "AMT" },
-  { value: "975", label: "Ammakal", datakey: "AKL" },
-  { value: "1298", label: "Amravati", datakey: "AMT" },
-  { value: "4759", label: "Anand Ga Border", datakey: "AMOGKA" },
-  { value: "964", label: "Anmod Ka Ga Border", datakey: "AMOGK" },
-];
-
+// 
 enum TripType {
   one_way = "one_way",
   round_trip = "round_trip",
 }
 
 type TicketBookingFormProps = {
-  fromCity: string;
-  toCity: string;
+  fromCity: CityPropsType |null;
+  toCity:  CityPropsType |null;
   returnDate?: Date;
   departureDate: Date | undefined;
   isSignleLady: boolean;
@@ -55,13 +31,19 @@ type TicketBookingFormProps = {
 };
 
 const TicketBookingForm = () => {
+
+  const { data:allcities, isLoading,  isError } = useGetAllCities();
+  const router = useRouter();
+  
+// Filter the toCity options based on the selected fromCity
+  const [toCities, setToCities] = useState<CityPropsType[]>([]);
   const [tripTypeValue, setTripTypeValue] = useState<string>(TripType.one_way);
   const [singleLady, setIsSignleLady] = useState<boolean>(false);
   const { handleSubmit, setValue, watch, register,formState:{errors,isSubmitted}   } =
     useForm<TicketBookingFormProps>({
       defaultValues: {
-        fromCity: "",
-        toCity: "",
+        fromCity: null,
+        toCity: null,
         tripType: TripType.one_way,
         departureDate:undefined,
         returnDate:undefined,
@@ -82,18 +64,42 @@ const TicketBookingForm = () => {
       shouldValidate: true,
       shouldTouch: true,
     });
-
     console.log("Custom value changed:", name, value);
   };
 
- 
+    
 
   const onSubmit = (data: TicketBookingFormProps) => {
+    console.log("Form submitted:", JSON.stringify(data));
 
-    console.log("Form submitted:", data);
-   
+    const queryParams = new URLSearchParams({
+      fromCityId: data.fromCity?.id.toString() || '',
+      fromCity: data.fromCity?.city_name || '',
+      toCity: data.toCity?.city_name || '',
+      toCityId: data.toCity?.id.toString() || '',
+      tripType: data.tripType,
+      departureDate: data.departureDate ? data.departureDate.toISOString() : '',
+      isSignleLady: data.isSignleLady.toString()
+    });
+
+    if (data.returnDate) {
+      queryParams.append('returnDate', data.returnDate.toISOString());
+    }
+
+    router.push(`/search?${queryParams.toString()}`);
   };
-
+  
+  // Watch for changes in 'fromCity' and filter 'toCity' accordingly
+  useEffect(() => {
+    if (allcities?.data && fromCity) {
+      // Filter out the selected fromCity from the toCities list
+      const filteredToCities = allcities.data.filter(
+        (city: CityPropsType) => city.id !== fromCity.id
+      );
+      setToCities(filteredToCities);
+    }
+  }, [allcities, fromCity]);
+  
   useEffect(() => {
     if (isSubmitted && errors) {
       Object.values(errors).forEach((error) => {
@@ -107,18 +113,30 @@ const TicketBookingForm = () => {
     }
   }, [errors, isSubmitted]);
 
-  const tripTypeHandler = (val: string) => {
-    console.log("Trip Type Changed:", val);
+  const tripTypeHandler = (val: string) => {  
     setCustomValue("tripType", val);
     setTripTypeValue(val);
   };
 
-  const handleCheckboxChange = () => {
-    console.log("Single Lady changed:", singleLady);
+  const handleCheckboxChange = () => {  
     setIsSignleLady((prev) => !prev);
     // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
+
+ 
+
+  
+
+  if(isError) {
+    alert("Failed to load cities")
+  }
+
+  if(isLoading) {
+    return <div>Loading.......</div>
+  }
+
+  console.log("toCities",!fromCity, fromCity );
 
   return (
     <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
@@ -164,10 +182,10 @@ const TicketBookingForm = () => {
           <div className="flex flex-col xl:w-[37%]">
       <div className="flex gap-4 relative xl:w-[100%]">
       <SearchableSelect
-              cities={cities}
+              cities={allcities.data}
               values={fromCity}
               isError={errors?.fromCity?.message}
-              OnChange={(value: string | null) =>
+              OnChange={(value: CityPropsType | null) =>
                 setCustomValue("fromCity", value)
               }
               lebelText1="Select Departure City"
@@ -178,12 +196,13 @@ const TicketBookingForm = () => {
               <ArrowRightLeft size={20} className="text-primary" />
             </div>
             <SearchableSelect
-              cities={cities}
+              cities={toCities}
               values={toCity}
               isError={errors?.toCity?.message}
-              OnChange={(value: string | null) =>
+              OnChange={(value: CityPropsType | null) =>
                 setCustomValue("toCity", value)
               }
+              isDisabled={allcities?.data && !fromCity}
               {...register("toCity", { required: "To city is required" })}
               lebelText1="Select Destination City"
               labelText2="Going To"

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { addMonths, format } from "date-fns"
+import { format, addMonths, isBefore, startOfDay, addDays, isAfter } from 'date-fns'
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -36,6 +36,12 @@ export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className
     setIsOpen(false)
   }
 
+  const isDateInRange = (date: Date) => {
+    const today = startOfDay(new Date())
+    const thirtyDaysFromNow = startOfDay(addDays(today, 30))
+    return !isBefore(date, today) && !isAfter(date, thirtyDaysFromNow)
+  }
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -65,12 +71,14 @@ export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            disabled={(date) => !isDateInRange(date)}
           />
           <Calendar
             mode="single"
             selected={date}
             onSelect={handleSelect}
             defaultMonth={date ? addMonths(date, 1) : addMonths(new Date(), 1)}
+            disabled={(date) => !isDateInRange(date)}
           />
         </div>
       </PopoverContent>

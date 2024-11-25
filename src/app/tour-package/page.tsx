@@ -1,5 +1,6 @@
 import Conatiner from "@/components/Global/Conatiner";
 import Image from "next/image";
+import SelectDate from "./SelectDate";
 
 const travelPackages = [
   {
@@ -163,10 +164,8 @@ const TourPackagePage = () => {
                   <p className="text-black/85 font-semibold text-sm text-center mt-1">
                     {pkg.hotel}
                   </p>
-                  <div className="mt-8">
-                    <button className="rounded-lg bg-orange-500 px-6 py-2 font-medium text-white transition-colors hover:bg-orange-600 w-full">
-                      Select Date
-                    </button>
+                  <div className="mt-8">                   
+                    <SelectDate/>
                   </div>
                 </div>
               </div>

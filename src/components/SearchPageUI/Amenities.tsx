@@ -1,4 +1,4 @@
-import { Plug, BoxIcon as Bottle, BlindsIcon as Blanket, AmbulanceIcon as FirstAid, PillIcon as Pillow, DoorOpen, Lamp, SprayCanIcon as Spray, DropletIcon as Sanitizer, BedDouble, Usb } from 'lucide-react'
+// import { Plug, BoxIcon as Bottle, BlindsIcon as Blanket, AmbulanceIcon as FirstAid, PillIcon as Pillow, DoorOpen, Lamp, SprayCanIcon as Spray, DropletIcon as Sanitizer, BedDouble, Usb } from 'lucide-react'
 
 
 type AmenitiesObjectType={ "amenity": string, "label": string }

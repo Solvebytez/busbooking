@@ -1,43 +1,43 @@
 import axiosInstance from "@/lib/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 
-interface PaymentDetails {
-  billing_phone: string;
-  billing_email: string;
-  schedule_id: number;
-  gst_number: string;
-  gst_company: string;
-  gst_address: string;
-  bus_dropoff_point: number;
-  bus_dropoff_point_text: string;
-  bus_boarding_point: number;
-  bus_boarding_point_text: string;
-  bus_origin_id: number;
-  bus_origin_name: string;
-  bus_destination_id: number;
-  bus_destination_name: string;
-  bus_dep_time: string;
-  bus_duration: string;
-  bus_arr_time: string;
-  bus_bus_type: string;
-  bus_can_cancel: boolean;
-  bus_via: string;
-  bus_booking_date: string;
-  order_id: string;
-  order_amount: string;
-  order_currency: string;
-  passenger_information: Array<{
-    seat_no: string;
-    seat_type: string;
-    seat_price: number;
-    seat_gst: number;
-    name: string;
-    age: number;
-    gender: string;
-    city: string;
-    state: string;
-  }>;
-}
+// interface PaymentDetails {
+//   billing_phone: string;
+//   billing_email: string;
+//   schedule_id: number;
+//   gst_number: string;
+//   gst_company: string;
+//   gst_address: string;
+//   bus_dropoff_point: number;
+//   bus_dropoff_point_text: string;
+//   bus_boarding_point: number;
+//   bus_boarding_point_text: string;
+//   bus_origin_id: number;
+//   bus_origin_name: string;
+//   bus_destination_id: number;
+//   bus_destination_name: string;
+//   bus_dep_time: string;
+//   bus_duration: string;
+//   bus_arr_time: string;
+//   bus_bus_type: string;
+//   bus_can_cancel: boolean;
+//   bus_via: string;
+//   bus_booking_date: string;
+//   order_id: string;
+//   order_amount: string;
+//   order_currency: string;
+//   passenger_information: Array<{
+//     seat_no: string;
+//     seat_type: string;
+//     seat_price: number;
+//     seat_gst: number;
+//     name: string;
+//     age: number;
+//     gender: string;
+//     city: string;
+//     state: string;
+//   }>;
+// }
 
 export const useGewtPayment = () => {
     return useMutation({

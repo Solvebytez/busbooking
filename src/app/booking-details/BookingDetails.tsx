@@ -22,8 +22,8 @@ import Link from "next/link"
 import Image from "next/image"
 
 import { useEffect, useState } from "react";
-import { calculateGastTotals, filterGstSeatData } from "@/lib/utils"
-import { useGetScheduleById } from "@/ClientApi/scheduleList"
+import { calculateGastTotals } from "@/lib/utils"
+
 import Schedule from "./Schedule"
 import { useGewtPayment } from "@/ClientApi/payment"
 import { useRouter } from "next/navigation"
@@ -92,7 +92,7 @@ const BookingDetailsClient = () => {
       const seatDetails = Object.values(formData[0].getSeats);
     
       //setSeatDetails([...seatDetails]);
-      setSeatDetails(seatDetails);
+      setSeatDetails([...seatDetails]);
     }
   }, [formData]); // Only run this effect when formData changes
 

@@ -92,7 +92,10 @@ const BookingDetailsClient = () => {
       const seatDetails = Object.values(formData[0].getSeats);
     
       //setSeatDetails([...seatDetails]);
-      setSeatDetails([...seatDetails]);
+      if (Array.isArray(seatDetails)) {
+        setSeatDetails([...seatDetails] as GetSeatDetails[]);
+      }
+      // setSeatDetails([...seatDetails]);
     }
   }, [formData]); // Only run this effect when formData changes
 

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 
 export type CityPropsType = {
-  id: string;
+  id: number;
   city_name: string;
 };
 

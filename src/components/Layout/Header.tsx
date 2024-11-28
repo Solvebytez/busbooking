@@ -44,7 +44,7 @@ const Header = () => {
         <Conatiner className="">
           <div className="flex flex-wrap items-center justify-between w-full">
             <div>
-              <Link href="#"> <Image
+              <Link href="/"> <Image
               className="dark:invert"
               src="/logo.svg"
               alt="Vercel logomark"

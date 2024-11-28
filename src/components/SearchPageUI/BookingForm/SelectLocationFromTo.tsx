@@ -1,14 +1,17 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, TrendingDown, TrendingUp } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { AiOutlineClose } from "react-icons/ai";
+import React, {  useRef, useState } from "react";
+// import { AiOutlineClose } from "react-icons/ai";
 
 export type CityPropsType = {
-  value: string;
-  label: string;
-  datakey: string;
-};
+  bus_time: string;
+  bus_stop_location: string;
+  bus_location_id: string;
+  location_type?:string,
+  phone_number?: string,
+  Additional_info?: string
+}
 
 const SelectLocationFromTo = ({
   cities,
@@ -19,14 +22,14 @@ const SelectLocationFromTo = ({
   isError,
 }: {
   cities: CityPropsType[];
-  values: string;
-  OnChange: (val: string) => void;
+  values: CityPropsType|null;
+  OnChange: (val: CityPropsType) => void;
   lebelText1: string;
   isError?: string;
   selectFor: string;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCity, setSelectedCity] = useState(values);
+ // const [selectedCity, setSelectedCity] = useState(values);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -34,37 +37,39 @@ const SelectLocationFromTo = ({
   //   setSearchTerm(e.target.value);
   // };
 
-  const handleSelectCity = (city: React.SetStateAction<string>) => {
-    OnChange(city as string);
+  const handleSelectCity = (city: CityPropsType) => {
+    console.log("filteredCities",city)
+    OnChange(city);
     setShowDropdown(false);
     setSearchTerm("");
   };
 
-  const clearSelection = () => {
-    setSelectedCity(""); // Clear the selected city
-    setSearchTerm(""); // Clear the search term
-    setShowDropdown(false);
-  };
+  // const clearSelection = () => {
+  //   //setSelectedCity(null); // Clear the selected city
+  //   setSearchTerm(""); // Clear the search term
+  //   setShowDropdown(false);
+  // };
 
   const filteredCities = cities.filter((city: CityPropsType) =>
-    city.label.toLowerCase().includes(searchTerm.toLowerCase())
+    city.bus_stop_location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      setShowDropdown(false);
-    }
-  };
+  // const handleClickOutside = (event: MouseEvent) => {
+  //   if (
+  //     dropdownRef.current &&
+  //     !dropdownRef.current.contains(event.target as Node)
+  //   ) {
+  //     setShowDropdown(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  // // useEffect(() => {
+  // //   document.addEventListener("click", handleClickOutside);
+  // //   return () => {
+  // //     document.removeEventListener("click", handleClickOutside);
+  // //   };
+  // // }, []);
+
 
   return (
     <div className="relative w-full">
@@ -87,18 +92,18 @@ const SelectLocationFromTo = ({
             ) : (
               <TrendingDown size={18} />
             )}
-            {values || lebelText1}
+            {values?.bus_stop_location || lebelText1}
           </div>
           {showDropdown ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
         </span>
         {/* Close Icon to Clear Selection */}
       </div>
-      {selectedCity && (
+      {/* {selectedCity && (
         <AiOutlineClose
           onClick={clearSelection}
           className="text-gray-500 cursor-pointer ml-2 hidden"
         />
-      )}
+      )} */}
       {/* Dropdown Menu */}
       {showDropdown && (
         <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
@@ -118,11 +123,11 @@ const SelectLocationFromTo = ({
             {filteredCities.length > 0 ? (
               filteredCities.map((city: CityPropsType) => (
                 <div
-                  key={city.label}
-                  onClick={() => handleSelectCity(city.label)}
+                  key={city.bus_location_id}
+                  onClick={() => handleSelectCity(city)}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100 text-gray-700"
                 >
-                  {city.label}
+                 {city.bus_time} - {city.bus_stop_location}
                 </div>
               ))
             ) : (

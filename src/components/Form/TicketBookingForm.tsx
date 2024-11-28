@@ -14,16 +14,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-toastify";
 import { useGetAllCities } from "@/ClientApi/cities";
 import { useRouter } from "next/navigation";
+import TravelFormSkeleton from "../Global/TravelFormSkeleton";
 
-// 
-enum TripType {
+//
+export enum TripType {
   one_way = "one_way",
   round_trip = "round_trip",
 }
 
 type TicketBookingFormProps = {
-  fromCity: CityPropsType |null;
-  toCity:  CityPropsType |null;
+  fromCity: CityPropsType | null;
+  toCity: CityPropsType | null;
   returnDate?: Date;
   departureDate: Date | undefined;
   isSignleLady: boolean;
@@ -31,25 +32,29 @@ type TicketBookingFormProps = {
 };
 
 const TicketBookingForm = () => {
-
-  const { data:allcities, isLoading,  isError } = useGetAllCities();
+  const { data: allcities, isLoading, isError } = useGetAllCities();
   const router = useRouter();
-  
-// Filter the toCity options based on the selected fromCity
+
+  // Filter the toCity options based on the selected fromCity
   const [toCities, setToCities] = useState<CityPropsType[]>([]);
   const [tripTypeValue, setTripTypeValue] = useState<string>(TripType.one_way);
   const [singleLady, setIsSignleLady] = useState<boolean>(false);
-  const { handleSubmit, setValue, watch, register,formState:{errors,isSubmitted}   } =
-    useForm<TicketBookingFormProps>({
-      defaultValues: {
-        fromCity: null,
-        toCity: null,
-        tripType: TripType.one_way,
-        departureDate:undefined,
-        returnDate:undefined,
-        isSignleLady: false,
-      },
-    });
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    register,
+    formState: { errors, isSubmitted },
+  } = useForm<TicketBookingFormProps>({
+    defaultValues: {
+      fromCity: null,
+      toCity: null,
+      tripType: TripType.one_way,
+      departureDate: undefined,
+      returnDate: undefined,
+      isSignleLady: false,
+    },
+  });
 
   const fromCity = watch("fromCity");
   const toCity = watch("toCity");
@@ -67,28 +72,35 @@ const TicketBookingForm = () => {
     console.log("Custom value changed:", name, value);
   };
 
-    
-
   const onSubmit = (data: TicketBookingFormProps) => {
     console.log("Form submitted:", JSON.stringify(data));
 
     const queryParams = new URLSearchParams({
-      fromCityId: data.fromCity?.id.toString() || '',
-      fromCity: data.fromCity?.city_name || '',
-      toCity: data.toCity?.city_name || '',
-      toCityId: data.toCity?.id.toString() || '',
+      fromCityId: data.fromCity?.id.toString() || "",
+      fromCity: data.fromCity?.city_name || "",
+      toCity: data.toCity?.city_name || "",
+      toCityId: data.toCity?.id.toString() || "",
       tripType: data.tripType,
-      departureDate: data.departureDate ? data.departureDate.toISOString() : '',
-      isSignleLady: data.isSignleLady.toString()
+      departureDate: data.departureDate
+        ? data.departureDate.toLocaleDateString("en-CA", {
+            timeZone: "Asia/Kolkata",
+          })
+        : "",
+      isSignleLady: data.isSignleLady.toString(),
     });
 
     if (data.returnDate) {
-      queryParams.append('returnDate', data.returnDate.toISOString());
+      queryParams.append(
+        "returnDate",
+        data.returnDate.toLocaleDateString("en-CA", {
+          timeZone: "Asia/Kolkata",
+        })
+      );
     }
 
     router.push(`/search?${queryParams.toString()}`);
   };
-  
+
   // Watch for changes in 'fromCity' and filter 'toCity' accordingly
   useEffect(() => {
     if (allcities?.data && fromCity) {
@@ -99,44 +111,46 @@ const TicketBookingForm = () => {
       setToCities(filteredToCities);
     }
   }, [allcities, fromCity]);
-  
+
   useEffect(() => {
     if (isSubmitted && errors) {
       Object.values(errors).forEach((error) => {
         if (error?.message) {
-          toast.error(error.message as string,{
-            icon:<CircleAlert className="text-red-600" />,
-            className:'text-red-600'
+          toast.error(error.message as string, {
+            icon: <CircleAlert className="text-red-600" />,
+            className: "text-red-600",
           }); // Display error message in toast
         }
       });
     }
   }, [errors, isSubmitted]);
 
-  const tripTypeHandler = (val: string) => {  
+  const tripTypeHandler = (val: string) => {
     setCustomValue("tripType", val);
     setTripTypeValue(val);
   };
 
-  const handleCheckboxChange = () => {  
+  const handleCheckboxChange = () => {
     setIsSignleLady((prev) => !prev);
     // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
 
- 
-
-  
-
-  if(isError) {
-    alert("Failed to load cities")
+  if (isError) {
+    alert("Failed to load cities");
   }
 
-  if(isLoading) {
-    return <div>Loading.......</div>
+  if (isLoading) {
+    return (
+      <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-lg relative w-full">
+        <div className="w-full">
+          <TravelFormSkeleton />
+        </div>
+      </div>
+    );
   }
 
-  console.log("toCities",!fromCity, fromCity );
+  console.log("toCities", !fromCity, fromCity);
 
   return (
     <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
@@ -180,49 +194,50 @@ const TicketBookingForm = () => {
         </RadioGroup>
         <div className="flex  gap-4 items-center h-[3.7rem] w-full">
           <div className="flex flex-col xl:w-[37%]">
-      <div className="flex gap-4 relative xl:w-[100%]">
-      <SearchableSelect
-              cities={allcities.data}
-              values={fromCity}
-              isError={errors?.fromCity?.message}
-              OnChange={(value: CityPropsType | null) =>
-                setCustomValue("fromCity", value)
-              }
-              lebelText1="Select Departure City"
-              labelText2="Leaving From"
-              {...register("fromCity", { required: "Departure city is required*" })}
-            />
-            <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[45%] z-10 top-[6px]">
-              <ArrowRightLeft size={20} className="text-primary" />
+            <div className="flex gap-4 relative xl:w-[100%]">
+              <SearchableSelect
+                cities={allcities.data}
+                values={fromCity}
+                isError={errors?.fromCity?.message}
+                OnChange={(value: CityPropsType | null) =>
+                  setCustomValue("fromCity", value)
+                }
+                lebelText1="Select Departure City"
+                labelText2="Leaving From"
+                {...register("fromCity", {
+                  required: "Departure city is required*",
+                })}
+              />
+              <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[45%] z-10 top-[6px]">
+                <ArrowRightLeft size={20} className="text-primary" />
+              </div>
+              <SearchableSelect
+                cities={toCities}
+                values={toCity}
+                isError={errors?.toCity?.message}
+                OnChange={(value: CityPropsType | null) =>
+                  setCustomValue("toCity", value)
+                }
+                isDisabled={allcities?.data && !fromCity}
+                {...register("toCity", { required: "To city is required" })}
+                lebelText1="Select Destination City"
+                labelText2="Going To"
+              />
             </div>
-            <SearchableSelect
-              cities={toCities}
-              values={toCity}
-              isError={errors?.toCity?.message}
-              OnChange={(value: CityPropsType | null) =>
-                setCustomValue("toCity", value)
-              }
-              isDisabled={allcities?.data && !fromCity}
-              {...register("toCity", { required: "To city is required" })}
-              lebelText1="Select Destination City"
-              labelText2="Going To"
-            />
-      </div>
-          
-            
           </div>
           <div className="flex gap-0 xl:w-[37%]">
             <DatePickerWithTwoMonths
               textLabel1="Date of Departure"
               textLabel2="Choose Date"
-              {...register("departureDate", { required: "Departure date is required" })}
+              {...register("departureDate", {
+                required: "Departure date is required",
+              })}
               value={departureDate ? departureDate : undefined}
               className="h-[3.7rem] w-[50%]"
               isError={errors?.departureDate?.message}
               onChange={(value: Date | undefined) =>
                 setCustomValue("departureDate", value)
               }
-              
             />
 
             <DatePickerWithTwoMonths
@@ -230,7 +245,10 @@ const TicketBookingForm = () => {
               textLabel1="Return Date"
               textLabel2="Choose Date (Optional)"
               {...register("returnDate", {
-                required: tripTypeValue === TripType.round_trip ? "Return date is required for round trips" : false,
+                required:
+                  tripTypeValue === TripType.round_trip
+                    ? "Return date is required for round trips"
+                    : false,
               })}
               isError={errors?.returnDate?.message}
               value={returnDate}
@@ -239,7 +257,6 @@ const TicketBookingForm = () => {
                 setCustomValue("returnDate", value)
               }
             />
-          
           </div>
           <div className=" h-full flex gap-4 items-center w-[26%]">
             <div className="items-center flex space-x-2 h-full justify-center px-5 border border-gray-600 rounded-lg w-[50%]">
@@ -254,13 +271,14 @@ const TicketBookingForm = () => {
               </div>
             </div>
             <div className="items-center flex h-full justify-center  w-[50%]">
-              <SubmitButton btnText={"Submit"} className="h-full font-bold w-full" />
+              <SubmitButton
+                btnText={"Submit"}
+                className="h-full font-bold w-full"
+              />
             </div>
           </div>
         </div>
       </form>
-     
-    
     </div>
   );
 };

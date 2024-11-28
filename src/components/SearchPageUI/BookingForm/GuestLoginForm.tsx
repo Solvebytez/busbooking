@@ -40,7 +40,11 @@ const countryPhoneCodes:CountryPropsType[] = [
 
   
 
-const GuestLoginForm = () => {
+const GuestLoginForm = ({onSuccsecchLogin}:{onSuccsecchLogin:(val:boolean)=>void}) => {
+
+
+  
+
   return (
     <Card>
     <CardHeader>
@@ -51,22 +55,24 @@ const GuestLoginForm = () => {
       </CardDescription>
     </CardHeader>
     <CardContent className="grid grid-cols-3 items-center justify-start gap-4">
-      <div className="space-y-1">
-        {/* <Label className="font-semibold" htmlFor="name">Select Country Code</Label> */}
+      {/* <div className="space-y-1">
+       
         <CountryCodeSelect OnChange={()=>{}} countryPhoneCodes={countryPhoneCodes} lebelText1="Select Country Code" values=""/>
       </div>
       <div className="space-y-1">
-        {/* <Label className="font-semibold"  htmlFor="number">Enter Mobile Number</Label> */}
+       
         <Input className="h-[3rem] border border-black font-bold" id="number" defaultValue="Enter Mobile Number" />
       </div>
       <div className="space-y-1">
-        {/* <Label className="font-semibold"  htmlFor="email">Enter Email ID</Label> */}
+     
         <Input className="h-[3rem] border border-black font-bold" id="email" defaultValue="Enter Email" />
-      </div>
+      </div> */}
     </CardContent>
     <CardFooter className="flex items-center w-[100%]">
      <div className="flex items-center w-[100%]">
-     <Button size={'lg'} className="text-xl capitalize m-auto">Procced To passenger detail</Button>
+     <button onClick={()=>onSuccsecchLogin(true)} type="button" className="text-xl capitalize m-auto">Proceed To passenger detail
+     
+     </button>
      </div>
     </CardFooter>
   </Card>

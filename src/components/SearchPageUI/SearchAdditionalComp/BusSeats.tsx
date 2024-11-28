@@ -1,51 +1,40 @@
-'use client'
+"use client";
 
-import { useState } from "react"
-import { ShipWheelIcon as SteeringWheel } from 'lucide-react'
-import { cn } from "@/lib/utils"
+import { ShipWheelIcon as SteeringWheel } from "lucide-react";
+import { BookedSeat, cn, SeatData } from "@/lib/utils";
 
-export default function Component() {
-  const [selectedSeats, setSelectedSeats] = useState<number[]>([])
-  
-  // Define the seat layout
-  const seatLayout = {
-    row1: [1, 6, 7],
-    row2: [2, 5, 8],
-    row3: [3, 4, 9, 10, 13, 14, 19],
-    
-    available: [7, 8, 15, 16, 17, 18],
-    booked: [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 19]
-  }
+type BusSeatProps = {
+  setSelectSeat: (val: SeatData[]) => void;
+  availableSeatForOneWay: SeatData[];
+  scheduleId: string;
+  selectedSeats: SeatData[];
+  booked_gents_seat: BookedSeat[];
+  booked_ladies_seat: BookedSeat[];
+};
 
-  const isSeatAvailable = (seatNumber: number) => seatLayout.available.includes(seatNumber)
-  const isSeatBooked = (seatNumber: number) => seatLayout.booked.includes(seatNumber)
-  const isSeatSelected = (seatNumber: number) => selectedSeats.includes(seatNumber)
+export default function BusSeats({
+  availableSeatForOneWay,
+  setSelectSeat,
+  selectedSeats,
+  booked_gents_seat,
+  booked_ladies_seat,
+}: BusSeatProps) {
+  const isSeatSelected = (seatNumber: SeatData) => {
+    return !!selectedSeats.find(
+      (item: SeatData) => item.seat === seatNumber.seat
+    );
+  };
 
-  const toggleSeatSelection = (seatNumber: number) => {
+  const toggleSeatSelection = (seatNumber: SeatData) => {
+    console.log("isSeatSelected(seatNumber)", isSeatSelected(seatNumber));
     if (isSeatSelected(seatNumber)) {
-      setSelectedSeats(selectedSeats.filter(seat => seat !== seatNumber))
+      setSelectSeat(
+        selectedSeats.filter((seat) => seat.seat !== seatNumber.seat)
+      );
     } else {
-      setSelectedSeats([...selectedSeats, seatNumber])
+      setSelectSeat([...selectedSeats, seatNumber]);
     }
-  }
-
-  const renderSeat = (seatNumber: number) => (
-    <button
-      key={seatNumber}
-      onClick={() => isSeatAvailable(seatNumber) && toggleSeatSelection(seatNumber)}
-      disabled={isSeatBooked(seatNumber)}
-      aria-label={`Seat ${seatNumber} ${isSeatBooked(seatNumber) ? 'booked' : isSeatAvailable(seatNumber) ? 'available' : 'selected'}`}
-      className={cn(
-        "h-12 rounded-sm transition-colors",
-        isSeatBooked(seatNumber) && "bg-gray-200 cursor-not-allowed",
-        isSeatAvailable(seatNumber) && !isSeatSelected(seatNumber) && "border-2 border-green-500 hover:bg-green-50",
-        isSeatSelected(seatNumber) && "bg-blue-500 text-white border-blue-500",
-        "flex items-center justify-center font-medium"
-      )}
-    >
-      {seatNumber}
-    </button>
-  )
+  };
 
   return (
     <div className="w-full mx-auto p-0">
@@ -53,51 +42,83 @@ export default function Component() {
         {/* Driver section */}
         <div className="absolute left-4 top-4">
           <div className="flex gap-1">
-          <SteeringWheel className="w-6 h-6 text-muted-foreground" />
-          <div className="text-xs text-muted-foreground mt-1">Lower Berth (6)</div>
+            <SteeringWheel className="w-6 h-6 text-muted-foreground" />
+            <div className="text-xs text-muted-foreground mt-1 font-bold text-green-600">
+              Available Seats ({availableSeatForOneWay.length.toString()})
+            </div>
           </div>
         </div>
 
         {/* Seat grid */}
-        <div className="grid gap-2 mt-12">
-          {/* First two rows */}
-          <div className="grid grid-cols-2 gap-24">
-            {/* Left side seats */}
-            <div className="grid gap-4">
-              <div className="grid grid-cols-3 gap-2 h-12">
-                {seatLayout.row1.map(renderSeat)}
-              </div>
-              <div className="grid grid-cols-3 gap-2 h-12">
-                {seatLayout.row2.map(renderSeat)}
-              </div>
-            </div>
-            
-            {/* Right side seats */}
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-2 h-12">
-                {[11, 16].map(renderSeat)}
-              </div>
-              <div className="grid grid-cols-2 gap-2 h-12">
-                {[12, 15].map(renderSeat)}
-              </div>
-              <div className="grid grid-cols-2 gap-2 h-12">
-                {[17, 18].map(renderSeat)}
-              </div>
-            </div>
-          </div>
+        <div className="gap-2 mt-6 flex flex-wrap">
+          {availableSeatForOneWay.map((seat, index) => {
+            const seatNumber = seat.seat;
 
-          {/* Bottom row */}
-          <div className="grid grid-cols-7 gap-2 h-12">
-            {seatLayout.row3.map(renderSeat)}
-          </div>
+            // If seat or price is not available, show 'Not Available' and skip rendering the button
+            if (!seatNumber || !seat.price) {
+              return null;
+            }
+
+            return (
+              <button
+                key={seatNumber + index}
+                onClick={() => toggleSeatSelection(seat)} // Add tripType here
+                // disabled={isSeatBooked(seatNumber)}
+                aria-label={`Seat ${seatNumber} ${
+                  isSeatSelected(seat) ? "selected" : "available"
+                }`}
+                className={cn(
+                  "h-8 rounded-sm text-xs transition-colors border border-green-600  w-[50px] flex items-center justify-center font-medium relative",
+
+                  // isSeatAvailable(seatNumber) &&
+                  //   !isSeatSelected(seatNumber) &&
+                  //   "border-2 border-green-500 hover:bg-green-50",
+                  isSeatSelected(seat) &&
+                    "bg-blue-500 text-white border-blue-500"
+                )}
+              >
+                <span className="absolute right-0 top-[30%] bottom-3 w-[3px] h-[13px] bg-green-600"></span>
+                {seatNumber}
+              </button>
+            );
+          })}
         </div>
-
+        <div className="gap-2 mt-6 flex flex-wrap">
+          {booked_gents_seat.length > 0 &&
+            booked_gents_seat.map((seat, index) => {
+              return (
+                <button
+                  key={seat.row + index}
+                  className={cn(
+                    "h-8 rounded-sm text-xs text-white transition-colors border bg-zinc-400 border-zinc-400  w-[50px] flex items-center justify-center font-medium relative cursor-not-allowed"
+                  )}
+                >
+                  {seat.row}
+                </button>
+              );
+            })}
+        </div>
+        <div className="gap-2 mt-6 flex flex-wrap">
+          {booked_ladies_seat.length > 0 &&
+            booked_ladies_seat.map((seat, index) => {
+              return (
+                <button
+                  key={seat.row + index}
+                  className={cn(
+                    "h-8 rounded-sm text-xs text-white transition-colors border bg-rose-500 border-rose-500  w-[50px] flex items-center justify-center font-medium relative cursor-not-allowed"
+                  )}
+                >
+                  {seat.row}
+                </button>
+              );
+            })}
+        </div>
         {/* Legend */}
         <div className="mt-8 flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-gray-200 rounded-sm" />
             <span>Booked</span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-green-500 rounded-sm" />
             <span>Available</span>
@@ -110,13 +131,20 @@ export default function Component() {
             <div className="w-4 h-4 bg-rose-500 rounded-sm" />
             <span>Female</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-zinc-400 rounded-sm" />
+            <span>Gents</span>
+          </div>
         </div>
 
         {/* Selected seats summary */}
-        <div className="mt-4 text-sm">
-          <strong>Selected Seats:</strong> {selectedSeats.length > 0 ? selectedSeats.join(', ') : 0}
+        <div className="mt-4 text-sm font-bold">
+          <strong>Selected Seats:</strong>{" "}
+          {selectedSeats.length > 0
+            ? selectedSeats.map((item) => item.seat).join(", ")
+            : 0}
         </div>
       </div>
     </div>
-  )
+  );
 }

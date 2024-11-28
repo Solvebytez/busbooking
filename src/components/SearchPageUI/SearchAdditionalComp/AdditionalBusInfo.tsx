@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Armchair, Clock, MapPinned } from "lucide-react";
@@ -5,24 +6,28 @@ import Amenities from "../Amenities";
 import BusSlider from "./BusSlider";
 import BusSeats from "./BusSeats";
 import BookingForm from "../BookingForm/BookingForm";
-import { useState } from "react";
-// import { Button } from "@/components/ui/button";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import GuestLoginForm from "../BookingForm/GuestLoginForm";
 import CredentialForm from "../BookingForm/CredentialForm";
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  convertBusBoardingStringToArray,
+  convertStringToArrayOfObjects,
+  convertToArrayString,
+  extractTimeAndName,
+  findAvailableSeatArray,
+  parseBookedSeats,
+  SeatData,
+} from "@/lib/utils";
 import Passenger_DetailForm from "../BookingForm/Passenger_Detail";
+import { useGetScheduleById } from "@/ClientApi/scheduleList";
+import { CityPropsType } from "@/components/Input/SelectInput";
+import { TripType } from "@/components/Form/TicketBookingForm";
+import { useSearchParams } from "next/navigation";
+import useDropOffStore from "@/store/boarding_dropOff_store";
 
 export enum BusOption {
   BOARDING_POINTS = "Boarding Points",
@@ -39,18 +44,75 @@ enum LoginType {
   credential_login = "credential_login",
 }
 
-const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
+const AdditionalBusInfo = ({
+  openItem,
+  scheduleId,
+  allcityList,
+}: {
+  openItem: string | null;
+  scheduleId: string;
+  allcityList: CityPropsType[];
+}) => {
   const [isPassengerOpen, setPassengerOpen] = useState(false as boolean);
   const [loginType, setLoginType] = useState<string>(LoginType.guest_Login);
+  const [selectedSeats, setSelectSeat] = useState<SeatData[]>([]);
+  const [isLogeedIn, setUserLoggedIn] = useState(false as boolean);
+  const [tabActive, setTabActive] = useState("customer_details");
+
+  const searchParams = useSearchParams();
+  const tripTypeUri = searchParams.get("tripType") ?? TripType.one_way;
+  const { setBoardingPoint,setDropOffList } = useDropOffStore();
+  const {
+    data: singleschedule,
+    isLoading,
+    error,
+  } = useGetScheduleById(scheduleId);
+
+  useEffect(() => {
+    setUserLoggedIn(false);
+    setPassengerOpen(false);
+  }, [selectedSeats]);
+
+  useEffect(()=>{
+    const defaultDropOff = {
+      bus_time: '', // Some default bus time
+      bus_stop_location: '', // Example location
+      bus_location_id: '', // Example ID
+    };
+
+    const defaultBoardingPoint = {
+      bus_time: '', // Some default bus time
+      bus_stop_location: '', // Example location
+      bus_location_id: '', // Example ID
+    };
+    setDropOffList(defaultDropOff);
+    setBoardingPoint(defaultBoardingPoint);
+  },[scheduleId, setBoardingPoint, setDropOffList])
+
+  if (isLoading || !singleschedule) return <p>Loading...</p>;
+  if (error) return <p>Error: {String(error)}</p>;
+
+  const { bus_layout, via, amenities } = singleschedule.data;
 
   if (openItem === BusOption.BOARDING_POINTS) {
+    const boardingStages =
+      allcityList &&
+      singleschedule &&
+      extractTimeAndName(bus_layout.boarding_stages);
     return (
-      <div className="flex gap-3 items-center font-semibold">
-        <div className="w-[40%]">AGUMBE BUS STAND</div>
-        <div className="flex gap-1 items-center">
-          <Clock size={15} /> 20:01
-        </div>
-      </div>
+      <>
+        {boardingStages.map((stage) => (
+          <div
+            key={stage.time}
+            className="flex gap-3 items-center font-semibold"
+          >
+            <div className="w-[40%]">{stage.name}</div>
+            <div className="flex gap-1 items-center">
+              <Clock size={15} /> {stage.time}
+            </div>
+          </div>
+        ))}
+      </>
     );
   }
 
@@ -113,44 +175,52 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
   }
 
   if (openItem === BusOption.DROPPING_POINTS) {
+    const dropingStages =
+      allcityList &&
+      singleschedule &&
+      extractTimeAndName(bus_layout.dropoff_stages);
     return (
-      <div className="flex gap-3 items-center font-semibold">
-        <div className="w-[40%]">SHRISHAIL BUS STAND</div>
-        <div className="flex gap-1 items-center">
-          <Clock size={15} /> 20:01
-        </div>
-      </div>
+      <>
+        {dropingStages.map((stage) => (
+          <div
+            key={stage.time}
+            className="flex gap-3 items-center font-semibold"
+          >
+            <div className="w-[40%]">{stage.name}</div>
+            <div className="flex gap-1 items-center">
+              <Clock size={15} /> {stage.time}
+            </div>
+          </div>
+        ))}
+      </>
     );
   }
 
   if (openItem === BusOption.VIA_CITIES) {
+    const viaCities = convertToArrayString(via);
     return (
       <nav className="bg-[#f8f9fa] p-3 w-full">
         <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-          <span className="text-gray-800">GOKARNA</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">KUMTA</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">SIRSI</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">HAVERI</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">HUVINA HADAGALI</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">HOSAPETE</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-gray-800">BALLARI</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-green-600">ADONI</span>
-          <span className="text-gray-500">-</span>
-          <span className="text-green-600">MANTRALAYA</span>
+          {viaCities.map((cities, i) => {
+            return (
+              <span key={cities + 1} className="text-gray-800">
+                <span className="text-gray-800">{cities}</span>
+                {i !== viaCities.length - 1 && (
+                  <span className="text-gray-500 ml-2">-</span>
+                )}
+              </span>
+            );
+          })}
         </div>
       </nav>
     );
   }
 
   if (openItem === BusOption.AMENITIES) {
-    return <Amenities />;
+    if (!amenities) return <div>No Amenities available</div>;
+
+    const amenitiesList = convertStringToArrayOfObjects(amenities);
+    return <Amenities amenitiesList={amenitiesList} />;
   }
 
   if (openItem === BusOption.BUS_PICTURES) {
@@ -158,28 +228,75 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
   }
 
   if (openItem === BusOption.SELECT_BERTH) {
+    const boarding_stopies = convertBusBoardingStringToArray(
+      bus_layout.boarding_stages,'boarding_stopies'
+    );
+    const droping_stopies = convertBusBoardingStringToArray(
+      bus_layout.dropoff_stages,'droping_stopies'
+    );
+
+    const availableSeatForOneWay = findAvailableSeatArray(
+      bus_layout.available,
+      bus_layout.available_gst,
+      tripTypeUri as TripType
+    );
+
+    const booked_gents_seat = parseBookedSeats(bus_layout.gents_booked_seats)
+    const booked_ladies_seat = parseBookedSeats(bus_layout.ladies_booked_seats)
+
+    console.log("bus_layout",bus_layout)
+
+   
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col ">
         <div className="flex gap-1 h-[3rem] mb-3">
-          <div className="w-[65%] font-semibold text-secondary flex items-center gap-2"> <span className="w-[40px] h-[40px] rounded-full bg-primary flex items-center justify-center">
-            <Armchair size={25} className="text-white" /></span> Select Seat</div>        
-          <div className="w-[33%] font-semibold text-secondary flex items-center gap-2"> <span className="w-[40px] h-[40px] rounded-full bg-primary flex items-center justify-center">
-          <MapPinned size={25} className="text-white" /></span>Select Pickup and Dropoff point</div>
+          <div className="w-[65%] font-semibold text-secondary flex items-center gap-2">
+            {" "}
+            <span className="w-[40px] h-[40px] rounded-full bg-primary flex items-center justify-center">
+              <Armchair size={25} className="text-white" />
+            </span>{" "}
+            Select Seat
+          </div>
+          <div className="w-[33%] font-semibold text-secondary flex items-center gap-2">
+            {" "}
+            <span className="w-[40px] h-[40px] rounded-full bg-primary flex items-center justify-center">
+              <MapPinned size={25} className="text-white" />
+            </span>
+            Select Pickup and Dropoff point
+          </div>
         </div>
-        <div className="flex gap-5">
+        <div className="flex gap-5 min-h-[25rem]">
           <div className="w-[65%]">
-            <BusSeats />
+            <BusSeats
+              availableSeatForOneWay={availableSeatForOneWay}
+              scheduleId={scheduleId}
+              setSelectSeat={setSelectSeat}
+              selectedSeats={selectedSeats}
+              booked_gents_seat={booked_gents_seat}
+              booked_ladies_seat={booked_ladies_seat}
+            />
           </div>{" "}
           <div className="w-[35%]">
-            <BookingForm onClick={() => setPassengerOpen((prev) => !prev)} />
+            <BookingForm
+            
+              selectedSeats={selectedSeats}
+              boarding_stopies={boarding_stopies}
+              droping_stopies={droping_stopies}
+              onClick={() => setPassengerOpen((prev) => !prev)}
+            />
           </div>{" "}
         </div>
         {isPassengerOpen && (
           <div>
-            <Tabs defaultValue="Customer Details" className="w-[100%] mt-4">
+            <Tabs
+              value={tabActive}
+              onValueChange={setTabActive}
+              className="w-[100%] mt-4"
+            >
               <TabsList className="grid w-full grid-cols-2 h-[3rem]">
                 <TabsTrigger
-                  value="Customer Details"
+                  disabled={isLogeedIn}
+                  value="customer_details"
                   className={cn(
                     "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
                   )}
@@ -187,7 +304,8 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
                   Customer Details
                 </TabsTrigger>
                 <TabsTrigger
-                  value="Passenger Detail"
+                  disabled={!isLogeedIn}
+                  value="passenger_login"
                   className={cn(
                     "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
                   )}
@@ -196,10 +314,10 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="Customer Details">
+              <TabsContent value="customer_details">
                 <div className="flex w-full h-[4rem] justify-center">
                   <RadioGroup
-                    defaultValue={loginType}
+                    value={loginType}
                     onValueChange={(val) => setLoginType(val)}
                     className="flex"
                   >
@@ -226,14 +344,25 @@ const AdditionalBusInfo = ({ openItem }: { openItem: string | null }) => {
                   </RadioGroup>
                 </div>
 
-                {/* {Guest Login FORM} */}
-                {loginType === LoginType.guest_Login && <GuestLoginForm />}
+                {loginType === LoginType.guest_Login && !isLogeedIn && (
+                  <GuestLoginForm
+                    onSuccsecchLogin={() => {
+                      setUserLoggedIn(false);
+                      setTabActive("passenger_login");
+                    }}
+                  />
+                )}
                 {loginType === LoginType.credential_login && <CredentialForm />}
-
-                {/* {Credential Login FORM} */}
               </TabsContent>
-              <TabsContent value="Passenger Detail">
-                <Passenger_DetailForm />
+
+              <TabsContent value="passenger_login">
+                {isPassengerOpen && (
+                  <Passenger_DetailForm
+                    selectedSeats={selectedSeats}
+                    scheduleId={scheduleId}
+                   
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </div>

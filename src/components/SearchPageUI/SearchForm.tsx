@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import SearchableSelect, {
@@ -7,69 +8,63 @@ import { useForm } from "react-hook-form";
 import DatePickerWithTwoMonths from "../Input/DataSelect";
 import { ArrowRightLeft, CircleAlert } from "lucide-react";
 import SubmitButton from "../Global/SubmitButton";
+// import { Label } from "@/components/ui/label";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-toastify";
-import { useSearchParams } from "next/navigation";
+import { useGetAllCities } from "@/ClientApi/cities";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate } from "@/app/utils/utils";
+import { FilterData } from "@/ClientApi/scheduleList";
+import { formatToISTDate } from "@/lib/utils";
+import TravelFormSkeleton from "../Global/TravelFormSkeleton";
+import useValidateQueryParams from "@/app/hooks/useValidateQueryParams";
 
-const cities: CityPropsType[] = [
-  { value: "2568", label: "Aatingal", datakey: "AAT" },
-  { value: "9", label: "Achampet", datakey: "APT" },
-  { value: "4", label: "Adoni", datakey: "ADT" },
-  { value: "673", label: "Afzalpur", datakey: "AFZ" },
-  { value: "854", label: "Agumbe", datakey: "AGB" },
-  { value: "2826", label: "Ahmed Nagar", datakey: "AHN" },
-  { value: "810", label: "Ajjampura", datakey: "AJP" },
-  { value: "1513", label: "Alakkot", datakey: "AKK" },
-  { value: "1152", label: "Alamatti", datakey: "ATT" },
-  { value: "2943", label: "Alappuzha", datakey: "ALE" },
-  { value: "2573", label: "Alapuzha", datakey: "ALP" },
-  { value: "25", label: "Alike", datakey: "ALK" },
-  { value: "30", label: "Alleppey", datakey: "AVP" },
-  { value: "3047", label: "Alnavar", datakey: "LNR" },
-  { value: "29", label: "Aluva", datakey: "AWY" },
-  { value: "2574", label: "Alwaye", datakey: "ALW" },
-  { value: "2544", label: "Ambikanager", datakey: "AMB" },
-  { value: "3056", label: "Ambur", datakey: "ABR" },
-  { value: "962", label: "Amingad", datakey: "AMN" },
-  { value: "30", label: "Aminkot", datakey: "AMT" },
-  { value: "975", label: "Ammakal", datakey: "AKL" },
-  { value: "1298", label: "Amravati", datakey: "AMT" },
-  { value: "4759", label: "Anand Ga Border", datakey: "AMOGKA" },
-  { value: "964", label: "Anmod Ka Ga Border", datakey: "AMOGK" },
-];
-
+//
 enum TripType {
   one_way = "one_way",
   round_trip = "round_trip",
 }
 
 type TicketBookingFormProps = {
-  fromCity: string;
-  toCity: string;
+  fromCity: CityPropsType | null;
+  toCity: CityPropsType | null;
   returnDate?: Date;
   departureDate: Date | undefined;
   isSignleLady: boolean;
   tripType: string;
 };
 
-const SearchForm = () => {
-  // Get the search parameters
-  const searchParams = useSearchParams();
+type SearchFormProps = {
+  setFilterData: React.Dispatch<React.SetStateAction<FilterData>>;
+  getAllCityList: React.Dispatch<React.SetStateAction<CityPropsType[]>>;
+};
 
-  // Access individual parameters
-  const fromCityURI = searchParams.get("fromCity");
-  const toCityURI = searchParams.get("toCity");
-  const departDateURI = formatDate(searchParams.get("departDate"));
+const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
+ 
+  const router = useRouter();
+
+
+  const searchParams = useSearchParams();
+  const { data: allcities, isLoading, isError } = useGetAllCities();
+  
+  const tripTypeUri = searchParams.get('tripType')
+  // Filter the toCity options based on the selected fromCity
+  const [toCities, setToCities] = useState<CityPropsType[]>([]);
+  //const [tripTypeValue] = useState<string>(TripType.one_way);
+  const [singleLady, setIsSignleLady] = useState<boolean>(false);
+
+  const departureDates = searchParams.get("departureDate");
+  // const formattedDepartureDate = departureDates
+  //   ? new Date(departureDates)
+  //   : undefined;
   const returnDateURI = formatDate(searchParams.get("returnDate"));
-  const modeURI = searchParams.get("mode") ?? TripType.one_way;
+  // const modeURI = searchParams.get("mode") ?? TripType.one_way;
   const isSignleLadyURI = searchParams.get("IsSingleLady") ? true : false;
 
-  console.log("isSignleLady", isSignleLadyURI); // Outputs: Fri Nov 29 2024 00:00:00 GMT+0530 (India Standard Time)
-
-  const [tripTypeValue] = useState<string | undefined>(modeURI);
-  const [singleLady, setIsSignleLady] = useState<boolean>(isSignleLadyURI);
+  useValidateQueryParams();
+  
   const {
     handleSubmit,
     setValue,
@@ -78,11 +73,12 @@ const SearchForm = () => {
     formState: { errors, isSubmitted },
   } = useForm<TicketBookingFormProps>({
     defaultValues: {
-      fromCity: fromCityURI ?? "",
-      toCity: toCityURI ?? "",
-      departureDate: departDateURI ?? undefined,
+      fromCity: null,
+      toCity: null,
+      tripType: tripTypeUri??TripType.one_way,
+      departureDate: formatDate(departureDates) ?? undefined,
       returnDate: returnDateURI ?? undefined,
-      isSignleLady: singleLady,
+      isSignleLady: isSignleLadyURI,
     },
   });
 
@@ -99,13 +95,56 @@ const SearchForm = () => {
       shouldValidate: true,
       shouldTouch: true,
     });
-
-    console.log("Custom value changed:", name, value);
   };
 
   const onSubmit = (data: TicketBookingFormProps) => {
-    console.log("Form submitted:", data);
+    console.log("Form submitted:", JSON.stringify(data));
+
+    const queryParams = new URLSearchParams({
+      fromCityId: data.fromCity?.id.toString() || "",
+      fromCity: data.fromCity?.city_name || "",
+      toCity: data.toCity?.city_name || "",
+      toCityId: data.toCity?.id.toString() || "",
+      tripType: data.tripType,
+      departureDate: data.departureDate
+        ? data.departureDate.toLocaleDateString("en-CA", {
+            timeZone: "Asia/Kolkata",
+          })
+        : "",
+      isSignleLady: data.isSignleLady.toString(),
+    });
+
+    if (data.returnDate) {
+      queryParams.append("returnDate", data.returnDate.toISOString());
+    }
+
+    // const formatDate=formatToISTDate(departureDate!)
+
+    // console.log("formatDate",formatDate);
+
+    //   const filterData={
+    //     onward_date: "2024-11-24",
+    //     origin: Number(fromCity?.id),
+    //     destination: Number(toCity?.id),
+    // }
+
+    //   setFilterData({...filterData})
+
+    router.push(`/search?${queryParams.toString()}`);
   };
+
+  // Watch for changes in 'fromCity' and filter 'toCity' accordingly
+  useEffect(() => {
+    
+    if (allcities?.data && fromCity) {
+      // Filter out the selected fromCity from the toCities list
+      const filteredToCities = allcities.data.filter(
+        (city: CityPropsType) => city.id !== fromCity.id
+      );
+      setToCities(filteredToCities);
+      getAllCityList(allcities.data);
+    }
+  }, [allcities, fromCity, getAllCityList]);
 
   useEffect(() => {
     if (isSubmitted && errors) {
@@ -120,12 +159,88 @@ const SearchForm = () => {
     }
   }, [errors, isSubmitted]);
 
+
+
   const handleCheckboxChange = () => {
-    console.log("Single Lady changed:", singleLady);
     setIsSignleLady((prev) => !prev);
     // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
+
+  useEffect(() => {
+    const formatDate = formatToISTDate(departureDate!);
+
+    const filterData = {
+      onward_date: formatDate,
+      origin: Number(fromCity?.id),
+      destination: Number(toCity?.id),
+    };
+
+    setFilterData({ ...filterData });
+  }, [departureDate, fromCity, setFilterData, toCity]);
+
+  useEffect(() => {
+    if (allcities?.data) {
+      const fromCityId = Number(searchParams.get("fromCityId") || "0");
+
+      const fromCity = allcities.data.find(
+        (city: CityPropsType) => (city.id as number) === fromCityId
+      );
+      const toCityId = searchParams.get("toCityId");
+      const toCity = allcities.data.find(
+        (city: CityPropsType) => city.id === parseInt(toCityId || "")
+      );
+
+      // Setting form values
+      setValue("fromCity", fromCity || null);
+      setValue("toCity", toCity || null);
+    }
+  }, [searchParams, allcities, setValue]);
+
+  const handleInputChange = (name: string, value: any) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (name === "fromCityId") {
+      const filteredToCities = allcities.data.find(
+        (city: CityPropsType) => city.id === Number(value)
+      );
+      console.log("filteredToCities", filteredToCities.city_name);
+      params.set("fromCity", filteredToCities.city_name);
+    }
+
+    if (name === "toCityId") {
+      const filteredToCities = allcities.data.find(
+        (city: CityPropsType) => city.id === Number(value)
+      );
+      console.log("filteredToCities", filteredToCities.city_name);
+      params.set("toCity", filteredToCities.city_name);
+    }
+    if (value) {
+      // Add or update the parameter
+      params.set(name, value);
+    } else {
+      // Remove the parameter if value is undefined or empty
+      params.delete(name);
+    }
+
+    console.log("params", params.get("fromCity"));
+    // // Push the updated query string to the URL
+    router.push(`?${params.toString()}`);
+  };
+
+  if (isError) {
+    alert("Failed to load cities");
+  }
+
+  if (isLoading) {
+    return  <div className="w-full p-4 bg-[#fff6f6] rounded-lg">
+       <div className="w-full md:px-[1rem] xl:px-[4rem]">
+          <TravelFormSkeleton />
+        </div>
+    </div>;
+  }
+
+  
 
   return (
     <div className="bg-primary/20 p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
@@ -134,33 +249,36 @@ const SearchForm = () => {
           <div className="flex  gap-4 items-center h-[3.7rem] w-full">
             <div className="flex flex-col xl:w-[37%]">
               <div className="flex gap-4 relative xl:w-[100%]">
-                {/* <SearchableSelect
-                  cities={cities}
+                <SearchableSelect
+                  cities={allcities.data}
                   values={fromCity}
                   isError={errors?.fromCity?.message}
-                  OnChange={(value: string | null) =>
-                    setCustomValue("fromCity", value)
-                  }
+                  OnChange={(value: CityPropsType | null) => {
+                    setCustomValue("fromCity", value);
+                    handleInputChange("fromCityId", value?.id as number);
+                  }}
                   lebelText1="Select Departure City"
                   labelText2="Leaving From"
                   {...register("fromCity", {
                     required: "Departure city is required*",
                   })}
-                /> */}
-                <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[46%] z-10 top-[6px]">
+                />
+                <div className="absolute w-[3rem] h-[3rem] rounded-full ring-1 ring-gray-400 md:flex items-center justify-center bg-white hidden left-[45%] z-10 top-[6px]">
                   <ArrowRightLeft size={20} className="text-primary" />
                 </div>
-                {/* <SearchableSelect
-                  cities={cities}
+                <SearchableSelect
+                  cities={toCities}
                   values={toCity}
                   isError={errors?.toCity?.message}
-                  OnChange={(value: string | null) =>
-                    setCustomValue("toCity", value)
-                  }
+                  OnChange={(value: CityPropsType | null) => {
+                    setCustomValue("toCity", value);
+                    handleInputChange("toCityId", value?.id);
+                  }}
+                  isDisabled={allcities?.data && !fromCity}
                   {...register("toCity", { required: "To city is required" })}
                   lebelText1="Select Destination City"
                   labelText2="Going To"
-                /> */}
+                />
               </div>
             </div>
             <div className="flex gap-0 xl:w-[37%]">
@@ -179,12 +297,12 @@ const SearchForm = () => {
               />
 
               <DatePickerWithTwoMonths
-                disabled={tripTypeValue == TripType.one_way}
+                disabled={tripTypeUri == TripType.one_way}
                 textLabel1="Return Date"
                 textLabel2="Choose Date (Optional)"
                 {...register("returnDate", {
                   required:
-                    tripTypeValue === TripType.round_trip
+                  tripTypeUri === TripType.round_trip
                       ? "Return date is required for round trips"
                       : false,
                 })}
@@ -197,12 +315,8 @@ const SearchForm = () => {
               />
             </div>
             <div className=" h-full flex gap-4 items-center w-[26%]">
-              <div className="items-center flex space-x-2 h-full justify-center px-5 border border-gray-600 rounded-lg w-[50%] bg-white">
-                <Checkbox
-                  id="terms1"
-                  defaultChecked={singleLady}
-                  onChange={handleCheckboxChange}
-                />
+              <div className="items-center flex space-x-2 h-full justify-center px-5 border border-gray-600 rounded-lg w-[50%]">
+                <Checkbox id="terms1" onChange={handleCheckboxChange} />
                 <div className="grid gap-1.5 leading-none">
                   <label
                     htmlFor="terms1"
@@ -214,7 +328,7 @@ const SearchForm = () => {
               </div>
               <div className="items-center flex h-full justify-center  w-[50%]">
                 <SubmitButton
-                  btnText={"Modify"}
+                  btnText={"Submit"}
                   className="h-full font-bold w-full"
                 />
               </div>

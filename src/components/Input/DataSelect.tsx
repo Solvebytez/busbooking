@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, addMonths, isBefore, startOfDay, addDays, isAfter } from 'date-fns'
+import { format, addMonths, isBefore, startOfDay, addDays, isAfter, isValid } from 'date-fns'
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -26,14 +26,25 @@ interface DatePickerWithTwoMonthsProps {
 
 
 export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className,disabled,onChange,value,isError}:DatePickerWithTwoMonthsProps) {
-  const [date, setDate] = React.useState<Date|undefined>(value)
+  const isValidDate = value ? isValid(new Date(value)) : true;
+
+  const [date, setDate] = React.useState<Date|undefined>(isValidDate?value:undefined)
   const [isOpen, setIsOpen] = React.useState(false)
 
   const handleSelect = (selectedDate: Date | undefined) => {
-    console.log("Selected date:", selectedDate)
-    setDate(selectedDate)
-    onChange(selectedDate)
-    setIsOpen(false)
+    console.log("Selected date:", selectedDate)   
+    try {
+      if (date && !isValid(date)) {
+        throw new Error("Invalid date selected");
+      }
+      setDate(selectedDate)
+      onChange(selectedDate)
+      setIsOpen(false)
+    } catch (error) {
+      console.error("Date selection error:", error);
+      // You could also show a toast message here
+      onChange(undefined);
+    }
   }
 
   const isDateInRange = (date: Date) => {
@@ -41,6 +52,7 @@ export default function DatePickerWithTwoMonths({textLabel1,textLabel2,className
     const thirtyDaysFromNow = startOfDay(addDays(today, 30))
     return !isBefore(date, today) && !isAfter(date, thirtyDaysFromNow)
   }
+
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

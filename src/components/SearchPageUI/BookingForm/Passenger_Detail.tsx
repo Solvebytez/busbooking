@@ -1,126 +1,216 @@
+"use client";
+
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import AllSelectInput, { GenederPropsType } from "./AllSelectInput";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn, SeatData } from "@/lib/utils";
+import { toast } from "react-toastify";
 
-const genederDetails: GenederPropsType[] = [
-  { name: "Male", label: "Male", value: "male" },
-  { name: "Female", label: "Female", value: "female" },
-  { name: "Others", label: "Others", value: "others" },
-];
+const passengerSchema = z.object({
+  seat_no: z.string(),
+  name: z.string().min(1, "Name is required"),
+  gender: z.string().min(1, "Gender is required"),
+  age: z.string().min(1, "Age is required").transform(Number),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  seat_price: z.number(),
+  seat_gst: z.number(),
+  scheduleId: z.string(),
+  tripType: z.string(),
+});
 
-const concession: GenederPropsType[] = [
-    { name: "General Public", label: "General Public", value: "General Public" },  
-  ];
+const formSchema = z.object({
+  passengers: z.array(passengerSchema),
+});
 
-  const ID_card: GenederPropsType[] = [
-    { name: "Passport", label: "Passport", value: "Passport" },  
-  ];
-  
-  
+type FormValues = z.infer<typeof formSchema>;
 
-const Passenger_DetailForm = () => {
+const Passenger_DetailForm = ({
+  selectedSeats,
+  scheduleId,
+}: {
+  selectedSeats: SeatData[];
+  scheduleId: string;
+}) => {
+  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      passengers: selectedSeats.map((seat) => ({
+        seat_no: seat.seat ?? "",
+        name: "",
+        gender: "",
+        age: 0,
+        seat_price: seat.price || 0,
+        seat_gst: seat.gst || 0,
+        city: "",
+        state: "",
+        scheduleId: scheduleId,
+        tripType: seat.tripType ?? "",
+      })),
+
+    },
+  });
+
+  const { fields } = useFieldArray({
+    control,
+    name: "passengers",
+  });
+
+  const onSubmit = (data: FormValues) => {
+    console.log("Form submitted with passenger data:", data.passengers);
+    toast.success("Form submitted successfully!");
+    // Handle form submission here (e.g., API call, state update, etc.)
+  };
+
+  const getErrorMessages = () => {
+    const errorMessages: string[] = [];
+   if(errors){
+    if (errors.passengers) {
+      errors.passengers.forEach((passengerErrors, index) => {
+        if (passengerErrors && typeof passengerErrors === 'object') {
+          Object.entries(passengerErrors).forEach(([ error]) => {
+            if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+              errorMessages.push(`Passenger ${index + 1} - ${error.message}`);
+            }
+          });
+        }
+      });
+    }
+   }
+    return errorMessages;
+  };
+
+  console.log("errors",errors)
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">As a Guest User Login</CardTitle>
-        <CardDescription>
-          Make changes to your account here. Click PROCEED TO Passenger detail
-          when {"you're"} done.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid grid-cols-8 items-center justify-start gap-1">
-      <div className="space-y-1">
-          {/* <Label className="font-semibold"  htmlFor="number">Enter Mobile Number</Label> */}
-          <button     
-      disabled={true}    
-      className={cn(
-        "h-12 w-full rounded-sm transition-colors border-2 border-green-500", "bg-white cursor-not-allowed relative",     
-        "flex items-center justify-center font-medium afterEffect"
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full mx-auto p-6 space-y-6 bg-white">
+      <h2 className="text-lg font-medium">
+        Make changes to your account here. Click PROCEED TO Passenger detail
+        when {"you're"} done.
+      </h2>
+
+      {fields.map((field, index) => (
+        <div key={field.id} className="grid grid-cols-8 gap-4 items-center">
+          <div className={cn(
+            "h-12 w-full rounded-sm transition-colors border-2 border-green-500",
+            "bg-white cursor-not-allowed relative",
+            "flex items-center justify-center font-medium afterEffect"
+          )}>
+            {field.seat_no}
+          </div>
+
+          <Controller
+            name={`passengers.${index}.name`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="Enter Name"
+                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
+                aria-invalid={!!errors.passengers?.[index]?.name}
+              />
+            )}
+          />
+
+          <Controller
+            name={`passengers.${index}.gender`}
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger 
+                  className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
+                  aria-invalid={!!errors.passengers?.[index]?.gender}
+                >
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+
+          <Controller
+            name={`passengers.${index}.age`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                type="number"
+                placeholder="Age"
+                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
+                aria-invalid={!!errors.passengers?.[index]?.age}
+              />
+            )}
+          />
+
+          <Controller
+            name={`passengers.${index}.city`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="Enter City"
+                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
+                aria-invalid={!!errors.passengers?.[index]?.city}
+              />
+            )}
+          />
+
+          <Controller
+            name={`passengers.${index}.state`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="Enter State"
+                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
+                aria-invalid={!!errors.passengers?.[index]?.state}
+              />
+            )}
+          />
+
+          {/* Hidden fields */}
+          <input type="hidden" {...control.register(`passengers.${index}.seat_no`)} />
+          <input type="hidden" {...control.register(`passengers.${index}.tripType`)} />
+          <input type="hidden" {...control.register(`passengers.${index}.seat_gst`)} />
+          <input type="hidden" {...control.register(`passengers.${index}.seat_price`)} />
+          <input type="hidden" {...control.register(`passengers.${index}.scheduleId`)} />
+        </div>
+      ))}
+
+      {/* Error messages section */}
+      {errors.passengers && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Please correct the following errors:</strong>
+          <ul className="mt-2 list-disc list-inside">
+            {getErrorMessages().map((message, index) => (
+              <li key={index}>{message}</li>
+            ))}
+          </ul>
+        </div>
       )}
-    >
-        13
-    </button>
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold"  htmlFor="number">Enter Mobile Number</Label> */}
-          <Input
-            className="h-[3rem] border border-black font-bold"
-            id="number"
-            defaultValue="Enter Name"
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold" htmlFor="name">Select Country Code</Label> */}
-          <AllSelectInput
-            OnChange={() => {}}
-            countryPhoneCodes={genederDetails}
-            lebelText1="Select Gender"
-            values=""
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold"  htmlFor="number">Enter Mobile Number</Label> */}
-          <Input
-            className="h-[3rem] border border-black font-bold"
-            id="number"
-            defaultValue="Age"
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold" htmlFor="name">Select Country Code</Label> */}
-          <AllSelectInput
-            OnChange={() => {}}
-            countryPhoneCodes={concession}
-            lebelText1="Concession"
-            values=""
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold" htmlFor="name">Select Country Code</Label> */}
-          <AllSelectInput
-            OnChange={() => {}}
-            countryPhoneCodes={ID_card}
-            lebelText1="ID Card"
-            values=""
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold"  htmlFor="email">Enter Email ID</Label> */}
-          <Input
-            className="h-[3rem] border border-black font-bold"
-            id="email"
-            defaultValue="ID Card No"
-          />
-        </div>
-        <div className="space-y-1">
-          {/* <Label className="font-semibold" htmlFor="name">Select Country Code</Label> */}
-          <AllSelectInput
-            OnChange={() => {}}
-            countryPhoneCodes={genederDetails}
-            lebelText1="India"
-            values=""
-            isDisabled={true}
-          />
-        </div>
-      </CardContent>
-      <CardFooter className="flex items-center w-[100%]">
-        <div className="flex items-center w-[100%]">
-          <Button size={"lg"} className="text-xl capitalize m-auto">
-            Procced To passenger detail
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+
+      <Button
+        type="submit"
+        className="w-full bg-orange-600 hover:bg-orange-700"
+      >
+        Proceed To Passenger Detail
+      </Button>
+    </form>
   );
 };
 
 export default Passenger_DetailForm;
+

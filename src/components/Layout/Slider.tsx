@@ -1,9 +1,11 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { toast } from "react-toastify";
 
 
 const listings = [
@@ -22,6 +24,23 @@ const listings = [
 ];
 
 const SliderBanner = () => {
+  const searchParams = useSearchParams();
+  console.log(searchParams.get("missingParams"))
+  useEffect(() => {
+    if (searchParams.get("missingParams") === "true") {
+      toast.error("Required Search fields are missing!", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: { backgroundColor: "white", color: "red" }, // Custom style
+      });
+    }
+  }, [searchParams]);
+  
   const settings = {
     dots: true,
     infinite: true,

@@ -9,6 +9,6 @@ export const useGetAllCities = () => {
         const response = await axiosInstance.post('bus/cities/get');
         return response.data; // Return only the data
       },
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 15, // 5 minutes
     });
   };

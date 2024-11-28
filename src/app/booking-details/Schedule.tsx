@@ -13,7 +13,7 @@ const Schedule = ({scehdualeID,seatDetails}:{scehdualeID:number;seatDetails:GetS
 const {data:scheduleData,isError,isLoading} = useGetScheduleById(scehdualeID.toString())
 const { data: allcities, isLoading:isCityLoading, isError:isCityError } = useGetAllCities();
  // Check loading state
- if (isLoading || isCityLoading) {
+ if (isLoading || isCityLoading || !scheduleData?.data) {
     return <div>Loading...</div>;
   }
 

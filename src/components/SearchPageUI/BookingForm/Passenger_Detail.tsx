@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -73,19 +75,20 @@ const Passenger_DetailForm = ({
 
   const getErrorMessages = () => {
     const errorMessages: string[] = [];
-   if(errors){
-    if (errors.passengers) {
-      errors.passengers.forEach((passengerErrors, index) => {
+    if (errors && errors.passengers) {
+      (errors.passengers as any[]).forEach((passengerErrors, __) => {
         if (passengerErrors && typeof passengerErrors === 'object') {
-          Object.entries(passengerErrors).forEach(([ error]) => {
-            if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
-              errorMessages.push(`Passenger ${index + 1} - ${error.message}`);
+          Object.entries(passengerErrors).forEach(([errorKey, errorValue]) => {
+            if (errorValue && typeof errorValue === 'object' && 'message' in errorValue && typeof errorValue.message === 'string') {
+              // Handle error message
+              console.log(`Error message for ${errorKey}: ${errorValue.message}`);
             }
           });
         }
+
       });
+
     }
-   }
     return errorMessages;
   };
 

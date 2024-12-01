@@ -26,7 +26,7 @@ export default function BusSeats({
   };
 
   const toggleSeatSelection = (seatNumber: SeatData) => {
-    console.log("isSeatSelected(seatNumber)", isSeatSelected(seatNumber));
+  
     if (isSeatSelected(seatNumber)) {
       setSelectSeat(
         selectedSeats.filter((seat) => seat.seat !== seatNumber.seat)

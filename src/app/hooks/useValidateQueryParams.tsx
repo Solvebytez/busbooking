@@ -18,6 +18,7 @@ const useValidateQueryParams = () => {
     let isValid = true;
     let errorMessage = "";
 
+ 
     // Validate fromCityId
     if (!fromCityId || !/^\d+$/.test(fromCityId)) {
       isValid = false;
@@ -25,13 +26,13 @@ const useValidateQueryParams = () => {
     }
 
     // Validate fromCity
-    if (!fromCity || !/^[a-zA-Z\s]+$/.test(fromCity)) {
+    if (!fromCity || (!/^[a-zA-Z\s]+$/.test(fromCity) && fromCity !== "A.S.Peta")) {
       isValid = false;
-      errorMessage += "Invalid fromCity. ";
+      errorMessage += "Invalid From City. ";
     }
 
     // Validate toCity
-    if (!toCity || !/^[a-zA-Z\s]+$/.test(toCity)) {
+    if (!toCity || (!/^[a-zA-Z\s]+$/.test(toCity) && toCity !== "A.S.Peta")) {
       isValid = false;
       errorMessage += "Invalid toCity. ";
     }

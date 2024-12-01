@@ -59,6 +59,8 @@ const BookingForm = ({
     addSeats(selectedSeats)    
   }, [addSeats, selectedSeats]);
 
+  console.log("selected_boardingPoint",selected_boardingPoint,"selected_dropOffList",selected_dropOffList)
+
 
   return (
     <div className="flex flex-col relative border rounded-lg p-4 bg-background h-full">

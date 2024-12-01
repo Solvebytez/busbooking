@@ -7,6 +7,7 @@ const TotalFareDetails = () => {
   // Fetch the total fare details from the API
   const [totalFareDetails, setTotalFareDetails] = useState<boolean>(false);
   const { subTotal,totalGst,totalSeatPrice } = usePriceStore();
+  
   return (
     <div className="w-full max-w-md  bg-white py-1 border-b">
     

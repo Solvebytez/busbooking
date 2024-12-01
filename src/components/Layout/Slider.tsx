@@ -25,7 +25,7 @@ const listings = [
 
 const SliderBanner = () => {
   const searchParams = useSearchParams();
-  console.log(searchParams.get("missingParams"))
+
   useEffect(() => {
     if (searchParams.get("missingParams") === "true") {
       toast.error("Required Search fields are missing!", {

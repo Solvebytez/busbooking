@@ -7,8 +7,7 @@ import SidebarFilter from "./SidebarFilter";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import AdditionalBusInfo from "./SearchAdditionalComp/AdditionalBusInfo";
 import {
-  cn,
-  formatDateToIST,
+  cn, 
   getLowestPrice,
   parseCityData,
 } from "@/lib/utils";
@@ -18,7 +17,9 @@ import useFilterData, {
   FilterData,
 } from "@/ClientApi/scheduleList";
 import { CityPropsType } from "../Input/SelectInput";
-
+import { useStore } from "@/store/storeFilterData";
+import { DateFormatter } from "../Global/DateFormatter";
+import { usePriceRangeStore } from "@/store/priceRange";
 
 export const options = [
   "Boarding Points",
@@ -34,31 +35,59 @@ export type TripDetailsQueryProps = {
   destination: number;
   onward_date: string;
   origin: number;
-}
-
+};
 
 const SearchResultConatiner = () => {
   const [schedulesList, setschedulesList] = useState<BusService[]>([]);
   const [allcityList, setAllCityList] = useState<CityPropsType[]>([]);
   const [openItems, setOpenItems] = useState<Record<any, any>>({});
 
-  const handleClick = useCallback((scheduleId: any, item: any) => {
-   
-    setOpenItems((prev) => ({
-      ...prev,
-      [scheduleId]: prev[scheduleId] === item ? "" : item,
-    }));
-  },[]);
+  const { selectedBusTypes, selectedDepartureTimes } = useStore();
+  const {maxPrice,minPrice}= usePriceRangeStore()
 
+  const [prevScheduleId, setPrevScheduleId] = useState<string | null>(null);
+
+  const handleClick = useCallback(
+    (scheduleId: any, item: string) => {
+      setOpenItems((prev) => {
+        // If clicking a different schedule, close previous items
+        if (prevScheduleId !== scheduleId) {
+          setPrevScheduleId(scheduleId);
+          return {
+            [scheduleId]: item,
+          };
+        }
+
+        // Same schedule, toggle current item
+        return {
+          ...prev,
+          [scheduleId]: prev[scheduleId] === item ? "" : item,
+        };
+      });
+    },
+    [prevScheduleId]
+  );
 
   const [filterData, setFilterData] = useState<FilterData>({
     destination: Number(825),
     onward_date: new Date().toISOString().split("T")[0],
     origin: Number(1273),
+    // bus_type:"",
+    // bus_time: "",
+    // // "price_range_min": ,
+    // // "price_range_max": 600
   });
 
+  console.log("filterData", maxPrice, minPrice);
+
   // Use the query hook
-  const { data, error, isLoading } = useFilterData(filterData);
+  const { data, error, isLoading } = useFilterData({
+    ...filterData,
+    ...(selectedBusTypes.length > 0 && { bus_type: selectedBusTypes[0] }),
+    ...(selectedDepartureTimes.length > 0 && { bus_time: selectedDepartureTimes[0] }),
+    price_range_min: minPrice,
+    price_range_max:maxPrice
+  });
   useEffect(() => {
     if (data) {
       setschedulesList(data.data);
@@ -67,20 +96,24 @@ const SearchResultConatiner = () => {
 
   if (error instanceof Error) return <div>Error: {error.message}</div>;
 
+  // if(isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
+  console.log("data", data?.highestFare,data?.lowestFare," maxPrice,",  maxPrice," minPrice", minPrice);
 
   return (
     <div>
       <SearchForm
         setFilterData={setFilterData}
-        getAllCityList={setAllCityList!}      
+        getAllCityList={setAllCityList!}
       />
       <TripFilterHeader />
       <div className="px-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
         <div className="w-full md:px-[1rem] xl:px-[4rem]">
           <div className="flex gap-4">
             <div className="flex flex-col w-[20%] mb-10">
-              <SidebarFilter />
+              <SidebarFilter/>
             </div>
             <div className="col-span-9  w-[80%]">
               {isLoading
@@ -134,9 +167,9 @@ const SearchResultConatiner = () => {
                               Reaches on
                             </h2>
                           </div>
-                          <div className="w-[23%]">
+                          {/* <div className="w-[23%]">
                             <h2 className="font-bold items-center">Via</h2>
-                          </div>
+                          </div> */}
                           <div className="w-[15%] text-right">
                             <h2 className="font-bold items-center">
                               {schedule.status}
@@ -148,7 +181,7 @@ const SearchResultConatiner = () => {
                         <div className="flex justify-between mt-4">
                           <div className="w-[20%]">
                             <h2 className="flex gap-2 font-bold items-center text-xl">
-                              {schedule.dep_time}, {boardingStages[0].cityName}
+                            <DateFormatter dateString={schedule.travel_date} />, {schedule.dep_time}, {boardingStages[0].cityName}
                             </h2>
                           </div>
                           <div className="w-[15%]">
@@ -162,18 +195,19 @@ const SearchResultConatiner = () => {
                           </div>
                           <div className="w-[28%]">
                             <h2 className="flex gap-2 font-bold items-center ">
-                              {formatDateToIST(schedule.main_dep_time)},{" "}
+                              {/* {formatDateToIST(schedule.main_dep_time)},{" "} */}
+                             
                               <span className="text-xl">
                                 {schedule.arr_time},{" "}
                                 {dropoffStages.at(-1)?.cityName}
                               </span>
                             </h2>
                           </div>
-                          <div className="w-[23%]">
+                          {/* <div className="w-[23%]">
                             <h2 className="font-bold items-center">
                               {schedule.via}
                             </h2>
-                          </div>
+                          </div> */}
                           <div className="w-[15%] text-right text-lg">
                             <h2 className="font-bold items-center">
                               {schedule.available_seats}
@@ -204,9 +238,15 @@ const SearchResultConatiner = () => {
                               )}
                               {item === "Select Berth" && (
                                 <button
-                                disabled={!schedule.available_seats}
+                                  disabled={!schedule.available_seats}
                                   onClick={() => handleClick(schedule.id, item)}
-                                  className={cn("w-full text-left p-2 mb-2 flex gap-2 items-center justify-center text-secondary bg-primary text-white font-bold rounded-md", {"cursor-not-allowed bg-zinc-400":!schedule.available_seats})}
+                                  className={cn(
+                                    "w-full text-left p-2 mb-2 flex gap-2 items-center justify-center text-secondary bg-primary text-white font-bold rounded-md",
+                                    {
+                                      "cursor-not-allowed bg-zinc-400":
+                                        !schedule.available_seats,
+                                    }
+                                  )}
                                 >
                                   Select Berth
                                 </button>
@@ -220,7 +260,7 @@ const SearchResultConatiner = () => {
                           <div className="bg-secondary/10 p-4">
                             <p>Details for: {openItems[schedule.id]}</p>
                             <AdditionalBusInfo
-                            scheduleId={schedule.id.toString()}
+                              scheduleId={schedule.id.toString()}
                               openItem={openItems[schedule.id]}
                               allcityList={allcityList}
                             />
@@ -230,6 +270,13 @@ const SearchResultConatiner = () => {
                       </div>
                     );
                   })}
+
+                  {!isLoading &&
+                    schedulesList.length <1 &&
+                    <div className="flex justify-center items-center h-[100vh]">
+                      No Result Found
+                      </div>
+                  }
               {/* Loop for each main div */}
             </div>
           </div>

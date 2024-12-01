@@ -15,6 +15,9 @@ import { toast } from "react-toastify";
 import { useGetAllCities } from "@/ClientApi/cities";
 import { useRouter } from "next/navigation";
 import TravelFormSkeleton from "../Global/TravelFormSkeleton";
+import useOnwardTripStore from "@/store/onwardTripStore";
+import Link from "next/link";
+import { useStore } from "@/store/storeFilterData";
 
 //
 export enum TripType {
@@ -34,7 +37,8 @@ type TicketBookingFormProps = {
 const TicketBookingForm = () => {
   const { data: allcities, isLoading, isError } = useGetAllCities();
   const router = useRouter();
-
+  const {   setOnwardTrip, setParsedOnwardTrip } = useOnwardTripStore();
+  const {setSelectedBusTypes,setSelectedDepartureTimes} = useStore()
   // Filter the toCity options based on the selected fromCity
   const [toCities, setToCities] = useState<CityPropsType[]>([]);
   const [tripTypeValue, setTripTypeValue] = useState<string>(TripType.one_way);
@@ -69,11 +73,11 @@ const TicketBookingForm = () => {
       shouldValidate: true,
       shouldTouch: true,
     });
-    console.log("Custom value changed:", name, value);
+ 
   };
 
   const onSubmit = (data: TicketBookingFormProps) => {
-    console.log("Form submitted:", JSON.stringify(data));
+ 
 
     const queryParams = new URLSearchParams({
       fromCityId: data.fromCity?.id.toString() || "",
@@ -98,6 +102,17 @@ const TicketBookingForm = () => {
       );
     }
 
+    // if(tripTypeValue === TripType.round_trip){
+    //   const onwardTripData = {
+    //     from: "Achampet",
+    //     to: "Srisailam",
+    //     date: "15 Nov",
+    //   };
+      
+    //   // Save it in localStorage
+    //   localStorage.setItem("Onward_Trip", JSON.stringify(onwardTripData));
+    // }
+
     router.push(`/search?${queryParams.toString()}`);
   };
 
@@ -110,7 +125,12 @@ const TicketBookingForm = () => {
       );
       setToCities(filteredToCities);
     }
-  }, [allcities, fromCity]);
+    setParsedOnwardTrip({})
+    setOnwardTrip({})
+    setSelectedBusTypes([])
+    setSelectedDepartureTimes([])
+    console.log("setParsedOnwardTrip data is empty")
+  }, [allcities, fromCity, setOnwardTrip, setParsedOnwardTrip, setSelectedBusTypes, setSelectedDepartureTimes]);
 
   useEffect(() => {
     if (isSubmitted && errors) {
@@ -132,12 +152,16 @@ const TicketBookingForm = () => {
 
   const handleCheckboxChange = () => {
     setIsSignleLady((prev) => !prev);
-    // console.log("Single Lady changed:", singleLady);  // Update form state in React Hook Form
+  
     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
 
   if (isError) {
-    alert("Failed to load cities");
+   return  <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-lg relative w-full">
+   <div className="w-full">
+     Failed To Load Cities. We will get back in few minutes
+   </div>
+ </div>
   }
 
   if (isLoading) {
@@ -150,7 +174,6 @@ const TicketBookingForm = () => {
     );
   }
 
-  console.log("toCities", !fromCity, fromCity);
 
   return (
     <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
@@ -162,9 +185,11 @@ const TicketBookingForm = () => {
           </h2>
         </div>
         <div className="bg-primary text-white px-5 py-2 rounded-tr-md">
+          <Link href="tour-package">
           <h2 className="text-md font-bold flex items-center gap-1">
             <Luggage size={18} /> Package Tour Booking
           </h2>
+          </Link>
         </div>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -251,6 +276,7 @@ const TicketBookingForm = () => {
                     : false,
               })}
               isError={errors?.returnDate?.message}
+              minDate={departureDate ? new Date(departureDate.getTime()) : undefined}
               value={returnDate}
               className="h-[3.7rem] w-[50%]"
               onChange={(value: Date | undefined) =>

@@ -7,11 +7,9 @@ import BusSlider from "./BusSlider";
 import BusSeats from "./BusSeats";
 import BookingForm from "../BookingForm/BookingForm";
 import { useEffect, useState } from "react";
-import { Label } from "@/components/ui/label";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import GuestLoginForm from "../BookingForm/GuestLoginForm";
-import CredentialForm from "../BookingForm/CredentialForm";
+
 import {
   cn,
   convertBusBoardingStringToArray,
@@ -39,10 +37,10 @@ export enum BusOption {
   SELECT_BERTH = "Select Berth",
 }
 
-enum LoginType {
-  guest_Login = "guest_Login",
-  credential_login = "credential_login",
-}
+// enum LoginType {
+//   guest_Login = "guest_Login",
+//   credential_login = "credential_login",
+// }
 
 const AdditionalBusInfo = ({
   openItem,
@@ -54,10 +52,10 @@ const AdditionalBusInfo = ({
   allcityList: CityPropsType[];
 }) => {
   const [isPassengerOpen, setPassengerOpen] = useState(false as boolean);
-  const [loginType, setLoginType] = useState<string>(LoginType.guest_Login);
+
   const [selectedSeats, setSelectSeat] = useState<SeatData[]>([]);
-  const [isLogeedIn, setUserLoggedIn] = useState(false as boolean);
-  const [tabActive, setTabActive] = useState("customer_details");
+ 
+ 
 
   const searchParams = useSearchParams();
   const tripTypeUri = searchParams.get("tripType") ?? TripType.one_way;
@@ -69,7 +67,6 @@ const AdditionalBusInfo = ({
   } = useGetScheduleById(scheduleId);
 
   useEffect(() => {
-    setUserLoggedIn(false);
     setPassengerOpen(false);
   }, [selectedSeats]);
 
@@ -244,7 +241,7 @@ const AdditionalBusInfo = ({
     const booked_gents_seat = parseBookedSeats(bus_layout.gents_booked_seats)
     const booked_ladies_seat = parseBookedSeats(bus_layout.ladies_booked_seats)
 
-    console.log("bus_layout",bus_layout)
+ 
 
    
     return (
@@ -277,8 +274,7 @@ const AdditionalBusInfo = ({
             />
           </div>{" "}
           <div className="w-[35%]">
-            <BookingForm
-            
+            <BookingForm            
               selectedSeats={selectedSeats}
               boarding_stopies={boarding_stopies}
               droping_stopies={droping_stopies}
@@ -289,32 +285,30 @@ const AdditionalBusInfo = ({
         {isPassengerOpen && (
           <div>
             <Tabs
-              value={tabActive}
-              onValueChange={setTabActive}
+              defaultValue="passenger_details"
               className="w-[100%] mt-4"
             >
-              <TabsList className="grid w-full grid-cols-2 h-[3rem]">
-                <TabsTrigger
-                  disabled={isLogeedIn}
+              <TabsList className="w-full h-[3rem] p-0">
+                <TabsTrigger                
                   value="customer_details"
                   className={cn(
-                    "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
+                    "text-lg font-bold bg-primary text-center w-full text-white data-[state=active]:text-white"
                   )}
                 >
                   Customer Details
                 </TabsTrigger>
-                <TabsTrigger
-                  disabled={!isLogeedIn}
-                  value="passenger_login"
+                {/* <TabsTrigger
+                  disabled={tabActive ==='customer_details' }
+                  value="passenger_details"
                   className={cn(
                     "text-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
                   )}
                 >
                   Passenger Detail
-                </TabsTrigger>
+                </TabsTrigger> */}
               </TabsList>
 
-              <TabsContent value="customer_details">
+              {/* <TabsContent value="customer_details">
                 <div className="flex w-full h-[4rem] justify-center">
                   <RadioGroup
                     value={loginType}
@@ -348,14 +342,14 @@ const AdditionalBusInfo = ({
                   <GuestLoginForm
                     onSuccsecchLogin={() => {
                       setUserLoggedIn(false);
-                      setTabActive("passenger_login");
+                      setTabActive("passenger_details");
                     }}
                   />
                 )}
                 {loginType === LoginType.credential_login && <CredentialForm />}
-              </TabsContent>
+              </TabsContent> */}
 
-              <TabsContent value="passenger_login">
+              <TabsContent value="passenger_details">
                 {isPassengerOpen && (
                   <Passenger_DetailForm
                     selectedSeats={selectedSeats}

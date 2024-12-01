@@ -1,345 +1,683 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
+"use client";
+
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { Check } from 'lucide-react'
-import Link from "next/link"
-import Image from "next/image"
-
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Check } from "lucide-react";
+import {
+  bookingSchema,
+  OneWayData,
+  PassengerInformation,
+} from "@/types/@BookingTypes";
 import { useEffect, useState } from "react";
-import { calculateGastTotals } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import FareBreakdown from "./FareBreakdown";
+import BusTicketDetails from "./BusTicketDetails";
+import Image from "next/image";
 
-import Schedule from "./Schedule"
-import { useGewtPayment } from "@/ClientApi/payment"
-import { useRouter } from "next/navigation"
+// Passenger Schema
 
-interface PassengerDetails {
-  name: string;
-  gender: string;
-  age: string;
-  concession: string;
-  country: string;
-  idCard: string;
-  idCardNo: string;
-  scheduleId: string;
-  seat: string;
-}
+// type Seat = {
+//   seat: string;
+//   price: number;
+//   gst: number;
+//   scheduleId: string;
+//   name?: string;
+//   gender?: string;
+//   age?: number;
+//   city?: string;
+//   state?: string;
+// }
 
-export interface GetSeatDetails {
-  seat: string;
-  price: number;
-  gst: number;
-  gstValue: number;
-  total: number;
-  gstAvailable: boolean;
-}
+// type BookingFormProps = {
+//   onwardPassengers?: PassengerInformation[];
+//   returnPassengers?: PassengerInformation[];
+// };
 
-const BookingDetailsClient = () => {
-  const router = useRouter()
-  const [formData, setFormData] = useState<any>(null);
-  const [userData,setUserData] = useState<PassengerDetails[]>([])
-  const [seatDetails, setSeatDetails] = useState<GetSeatDetails[]>([]);
-  const { mutateAsync: initiatePayment } = useGewtPayment();
-  const [scehdualeID, setscehdualeID] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
+export default function BookingForm() {
+  const [alloneWayData, setOneWayData] = useState<OneWayData | null>(null);
+  const [onwardPassengers, setOnwardPassengers] = useState<
+    PassengerInformation[]
+  >([]);
+
+  const [allReturnWayData, setAllReturnWayData] = useState<OneWayData | null>(
+    null
+  );
+  const [returnPassengers, setReturnPassengers] = useState<
+    PassengerInformation[]
+  >([]);
+
+  const form = useForm<z.infer<typeof bookingSchema>>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      emailId: "",
+      contactNumber: "",
+      onwardPassengers: onwardPassengers.map((passenger) => ({
+        seat_no: passenger.seat_no,
+        name: passenger.name || "",
+        gender: passenger.gender || "",
+        age: passenger.age || 0,
+        city: passenger.city || "",
+        state: passenger.state || "",
+        seat_price: passenger.seat_price,
+        seat_gst: passenger.seat_gst,
+        scheduleId: passenger.scheduleId,
+        tripType: "onward",
+      })),
+      returnPassengers: returnPassengers.map((passenger) => ({
+        seat_no: passenger.seat_no,
+        name: passenger.name || "",
+        gender: passenger.gender || "",
+        age: passenger.age || 0,
+        city: passenger.city || "",
+        state: passenger.state || "",
+        seat_price: passenger.seat_price,
+        seat_gst: passenger.seat_gst,
+        scheduleId: passenger.scheduleId,
+        tripType: "return",
+      })),
+      termsAccepted: false,
+    },
+  });
+
   useEffect(() => {
-    // Check if localStorage is available
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const storedData = localStorage.getItem('passengerDetails');
-      if (storedData) {
-        // Parse the JSON string into an object and set it to the state
-        setFormData(JSON.parse(storedData));
+    // Fetch data from localStorage
+    const storedData =
+      localStorage.getItem("one_way") || localStorage.getItem("Onward_Trip");
+
+    if (storedData) {
+      try {
+        const parsedData: OneWayData = JSON.parse(storedData);
+        setOneWayData(parsedData);
+        const passengers = parsedData.passenger_information ?? [];
+        setOnwardPassengers(passengers);
+
+        // Set the form values
+        form.setValue(
+          "onwardPassengers",
+          passengers.map((passenger) => ({
+            ...passenger,
+            tripType: "onward",
+          }))
+        );
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
       }
     }
+    const returnData = localStorage.getItem("round_trip");
+    if (returnData) {
+      try {
+        const parsedReturnData: OneWayData = JSON.parse(returnData);
+        setAllReturnWayData(parsedReturnData);
 
-  }, []);
+        const passengers = parsedReturnData.passenger_information ?? [];
+        setReturnPassengers(passengers);
 
-
-  useEffect(() => {
-    // Set the user data after formData is updated
-    if (formData) {
-      const filteredData = formData.filter((item: any) => {
-        
-        const { data } = item;
-        console.log("seatdata",data.seat)
-        return data.name && data.gender && data.age && data.concession && data.idCard && data.idCardNo && data.seat;
-      }).map((item: any) => ({
-        ...item.data,  // Destructure and include the data object
-       // scheduleId: item.scheduleId,  // Include the scheduleId
-        // seat: item.seat,  // Include the seat from getSeats
-      }));
-      setUserData(filteredData);
-
-      setscehdualeID(formData[0].scheduleId)
-    }
-    
-    if(formData){
-      const seatDetails = Object.values(formData[0].getSeats);
-    
-      //setSeatDetails([...seatDetails]);
-      if (Array.isArray(seatDetails)) {
-        setSeatDetails([...seatDetails] as GetSeatDetails[]);
+        // Set the form values
+        form.setValue(
+          "returnPassengers",
+          passengers.map((passenger) => ({
+            ...passenger,
+            tripType: "onward",
+          }))
+        );
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
       }
-      // setSeatDetails([...seatDetails]);
     }
-  }, [formData]); // Only run this effect when formData changes
+  }, [form]);
 
+  function onSubmit(values: z.infer<typeof bookingSchema>) {
+    console.log(values);
+  }
 
-  const result = calculateGastTotals(seatDetails);
+  console.log(
+    "alloneWayData",
+    alloneWayData?.priceData?.subTotal,
+    "allReturnWayData",
+    allReturnWayData?.priceData?.subTotal
+  );
 
-  // const { data, isLoading, error } = useGewtPayment(result.allTotal.toString());
+  const oneWaySubtotal = alloneWayData?.priceData?.subTotal || 0;
+const returnWaySubtotal = allReturnWayData?.priceData?.subTotal || 0;
 
-  const handlePayment = async () => {
-    setIsLoading(true);
-    try {
-      const data = await initiatePayment(result.allTotal.toString());
-      if (data.error) {
-        alert(data.error);
-      } else {
-        console.log("Payment",data.data.redirect_url)
-        // Assuming the API returns a redirect_url in the response
-        router.replace(data.data.redirect_url);
-        alert("Payment Initiated Successfully");
-      }
-    } catch (error) {
-      console.error('Payment initiation failed:', error);
-      alert("Payment initiation failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const total = oneWaySubtotal + returnWaySubtotal;
+
+  if (onwardPassengers.length === 0) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          No passengers have been selected. Please go back and select seats for
+          your journey.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <div>
-      {formData ? (
-        <div>
-          {/* <h1>Passenger Data</h1>
-          <pre>{JSON.stringify(formData, null, 2)}</pre> */}
-        </div>
-      ) : (
-        <p>No data found in localStorage</p>
-      )}
-      <div className="flex gap-4">
-          <div className="col-span-9  w-[80%]">
-          <Card className="w-full mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Review Booking</CardTitle>
-        <span className="text-sm text-muted-foreground">Booking as: Guest</span>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Contact Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email ID</Label>
-            <Input 
-              id="email" 
-              defaultValue="sahinh013@gmail.com" 
-              readOnly 
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="contact">Contact Number</Label>
-            <Input 
-              id="contact" 
-              defaultValue="08670695089" 
-              readOnly 
-              required
-            />
-          </div>
-        </div>
-
-        {/* Trip Details */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Onward Trip Booking Review</h3>
-        <Schedule scehdualeID={scehdualeID} seatDetails={seatDetails}/>
-        </div>
-
-        {/* Passenger Details */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Onward Trip Passenger</h3>
-          {userData && (
-            userData.map((item)=>{
-                return (
-                  <div className="" key={item.idCardNo}>
-          <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
-            <div className="space-y-2">
-              <Label>Seat</Label>
-              <Input defaultValue={item.seat} readOnly className="bg-muted" />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Name</Label>
-              <Input defaultValue={item.name} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Gender</Label>
-              <Select defaultValue={item.gender}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Age</Label>
-              {/* <Input defaultValue={item.age} value={item.age} /> */}
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Concession</Label>
-              <Select defaultValue={item.concession}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select concession" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">GENERAL PUBLIC</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>ID Card</Label>
-              <Select defaultValue={item.idCard}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select ID type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="passport">Passport</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>ID Card No</Label>
-              <Input placeholder="Enter ID number" value={item.idCardNo} onChange={()=>{}} />
-            </div>
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Select defaultValue={item.country}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="myanmar">India</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          </div>
-                )
-            })
-          )}
-          
-        </div>
-
-        {/* Fare Details */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Onward Trip Fare Breakup</h3>
-          <div className="space-y-2">
-                {/* <div className="flex justify-between">
-                  <span>Seat</span>
-                  <span>{item.seat}</span>
-                </div> */}
-                <div className="flex justify-between">
-                  <span>Original Total</span>
-                  <span>₹{result.total}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>GST</span>
-                  <span>₹{result.gst}</span>
-                </div>
-                {/* <div className="text-xs text-muted-foreground">
-                  GST Available: {item.gstAvailable ? "Yes" : "No"}
-                </div> */}
-               
+    <div className="w-full md:px-[1rem] xl:px-[4rem] my-10">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-12 gap-4 items-start"
+        >
+          <Card className="col-span-8">
+            <CardHeader>
+              <CardTitle>Review Booking</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Basic Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="emailId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email ID</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="email@example.com"
+                          {...field}
+                          className="h-12 rounded-sm border-gray-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contactNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="1234567890"
+                          {...field}
+                          className="h-12 rounded-sm border-gray-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-           <div className="flex justify-between font-semibold pt-2 border-t">
-                  <span>Total Fare</span>
-                  <span>₹ {result.allTotal}</span>
+              <Separator className="my-4" />
+              {alloneWayData?.passenger_information && (
+                <BusTicketDetails
+                  detailsType="oneWayData"
+                  onwordsSearch={alloneWayData.onwordsSearch!}
+                  passenger_information={alloneWayData?.passenger_information}
+                  boardingPoints={alloneWayData.selected_boardingPoint!}
+                  dropOffPoints={alloneWayData.selected_dropOffList!}
+                />
+              )}
+
+              {/* Onward Trip */}
+              {onwardPassengers.length > 0 && (
+                <div className="space-y-4 p-5 bg-green-100/10">
+                  <h3 className="text-lg font-semibold">
+                    Onward Trip Passengers Review
+                  </h3>
+                  {form.watch("onwardPassengers")?.map((_, index) => (
+                    <Card
+                      key={index}
+                      className="flex flex-col items-center shadow-none border-none bg-transparent"
+                    >
+                      <CardContent className="w-full p-0">
+                        <div className="grid grid-cols-6 gap-4 flex-1">
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.seat_no`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Seat No</FormLabel>
+                                <FormControl>
+                                  <button
+                                    type="button"
+                                    disabled
+                                    className={cn(
+                                      "h-12 rounded-sm  w-full transition-colors border-2 border-green-500",
+                                      "bg-white cursor-not-allowed relative",
+                                      "flex items-center justify-center font-medium afterEffect"
+                                    )}
+                                  >
+                                    {field.value || "N/A"}{" "}
+                                    {/* Display the seat number or a placeholder */}
+                                  </button>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.gender`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Gender</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="h-12 rounded-sm border-gray-500">
+                                      <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">
+                                      Female
+                                    </SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.age`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Age</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.valueAsNumber)
+                                    }
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.city`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.state`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.seat_price`}
+                            render={({ field }) => (
+                              <FormItem hidden>
+                                <FormLabel>Seat Price</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    readOnly
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`onwardPassengers.${index}.seat_gst`}
+                            render={({ field }) => (
+                              <FormItem hidden>
+                                <FormLabel>Seat GST</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    readOnly
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {alloneWayData && alloneWayData.priceData && onwardPassengers.length >0 && (
+                    <FareBreakdown
+                      priceType="oneWayData"
+                      priceData={alloneWayData.priceData}
+                    />
+                  )}
                 </div>
-        </div>
-      </CardContent>
-    </Card>
-          </div>
-          <div className="flex flex-col w-[20%] mb-10">
-          <div className="max-w-md mx-auto p-0">
-      <Card className="mb-6">
-        <CardContent className="pt-0">
-          <h2 className="text-xl font-semibold mb-4 pt-5">Select Payment Gateway</h2>
-          
-          <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
+              )}
+
+            
+
+              {returnPassengers.length > 0 && (  <>
+                <Separator className="my-4" />                <h3 className="text-lg font-semibold">
+                  Return Trip Passengers Review
+                </h3>
+              </>
+              )}
+
+              {allReturnWayData?.passenger_information && (
+                <BusTicketDetails
+                  detailsType="round_trip"
+                  onwordsSearch={allReturnWayData.onwordsSearch!}
+                  passenger_information={
+                    allReturnWayData?.passenger_information
+                  }
+                  boardingPoints={allReturnWayData.selected_boardingPoint!}
+                  dropOffPoints={allReturnWayData.selected_dropOffList!}
+                />
+              )}
+
+              {returnPassengers.length > 0 && <Separator className="my-4" />}
+              
+              {/* Return Trip */}
+              {returnPassengers.length > 0 && (
+                <div className="space-y-4 bg-primary/5 p-5">
+                  {form.watch("returnPassengers")?.map((_, index) => (
+                    <Card
+                      key={index}
+                      className="flex flex-col items-center shadow-none border-none bg-transparent "
+                    >
+                      <CardContent className="w-full p-0">
+                        <div className="grid grid-cols-6 gap-4 flex-1">
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.seat_no`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Seat No</FormLabel>
+                                <FormControl>
+                                  <button
+                                    type="button"
+                                    disabled
+                                    className={cn(
+                                      "h-12 rounded-sm  w-full transition-colors border-2 border-primary",
+                                      "bg-white cursor-not-allowed relative",
+                                      "flex items-center justify-center font-medium afterEffect after:bg-primary"
+                                    )}
+                                  >
+                                    {field.value || "N/A"}{" "}
+                                    {/* Display the seat number or a placeholder */}
+                                  </button>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.gender`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Gender</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="h-12 rounded-sm border-gray-500">
+                                      <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">
+                                      Female
+                                    </SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.age`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Age</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.valueAsNumber)
+                                    }
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.city`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.state`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.seat_price`}
+                            render={({ field }) => (
+                              <FormItem hidden>
+                                <FormLabel>Seat Price</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    readOnly
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`returnPassengers.${index}.seat_gst`}
+                            render={({ field }) => (
+                              <FormItem hidden>
+                                <FormLabel>Seat GST</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    readOnly
+                                    className="h-12 rounded-sm border-gray-500"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              {allReturnWayData && allReturnWayData.priceData && (
+                <FareBreakdown
+                  priceType="returnPrice"
+                  priceData={allReturnWayData.priceData}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Select Payment Gateway</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+            <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
             <div className="flex items-start gap-2">
              
               <div className="space-y-2 flex flex-col items-center">
              <div className="flex gap-3">
              <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
                 <Image
-                  src="/razorpay.png"
+                  src="/phonepe-1.svg"
                   alt="Razorpay"
                   width={120}
                   height={30}
                   className="mb-2"
                 />
              </div>
-                <p className="text-sm text-gray-600 mb-2">
-                  ಎಲ್ಲಾ ಪ್ರಮುಖ ನೆಟ್ ಬ್ಯಾಂಕಿಂಗ್, ಕ್ರೆಡಿಟ್ / ಡೆಬಿಟ್ ಕಾರ್ಡ್ / ಇ-ವಾಲೆಟ್ ಎಸ್.ಬಿ.ಐ, ಐಸಿಐಸಿಐ, ಐಸಿಐಸಿಐ, ಎಚ್.ಡಿ.ಎಫ್.ಸಿ, ರುಪೇ ...
-                </p>
-                <p className="text-sm">
-                  All Major Net Banking, Credit / Debit card / e-Wallet SBI, HDFC, ICICI, AXIS, RuPay ...
-                </p>
+              
               </div>
             </div>
           </div>
-
-          <div className="flex items-start gap-2 mt-6">
-            <Checkbox id="terms" className="mt-1" />
-            <label htmlFor="terms" className="text-sm">
-              I agree to{" KSRTC's"}{" "}
-              <Link href="#" className="text-blue-600 hover:underline">
-                Terms and Conditions
-              </Link>
-            </label>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
-        <div className="flex justify-between items-center px-2">
-          <span className="text-lg">Amount to be Paid</span>
-          <span className="text-lg font-semibold">₹{result.allTotal}</span>
+              {/* Terms and Conditions */}
+              <FormField
+                control={form.control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        I agree to {"SANCHAR6T's"} Terms and Conditions
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+                <Separator className="my-4" />
+              <div className="flex justify-between items-center px-2">
+          <span className="text-lg font-bold">Amount to be Paid</span>
+          <span className="text-lg font-semibold">₹ {total}</span>
         </div>
-        
-        <Button 
-        onClick={handlePayment}
-        disabled={isLoading}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg"
-        >
-          {isLoading&& "Loading...."}PROCEED TO PAY
-        </Button>
-      </div>
-    </div>
-          </div>
-      </div>
-     
+
+              <Button type="submit" className="w-full">
+                Proceed to Pay
+              </Button>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }
-
-export default BookingDetailsClient

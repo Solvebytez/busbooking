@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatDate(dateString:any) {
+  console.log("dateString",!dateString)
     // Handle format: November-29th-2024
     if(!dateString)return undefined;
   if (dateString.includes("-")) {

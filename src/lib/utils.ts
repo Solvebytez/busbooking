@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TripType } from "@/components/Form/TicketBookingForm";
 import { CityPropsType } from "@/components/Input/SelectInput";
+import { PassengerInformation } from "@/types/@BookingTypes";
 import { clsx, type ClassValue } from "clsx"
 import { format, parse } from "date-fns";
 import { twMerge } from "tailwind-merge"
@@ -67,40 +68,10 @@ export const getLowestPrice = (data: string) => {
 };
 
 export function formatDateToIST(inputDateStr: string) {
-  // Parse the input date string in DD/MM/YYYY HH:mm format
-  const [datePart, timePart] = inputDateStr.split(" ");
-  const [day, month, year] = datePart.split("/").map(Number);
-  const [hours, minutes] = timePart.split(":").map(Number);
-
-  // Create a Date object in local time
-  const date = new Date(year, month - 1, day, hours, minutes);
-
-  // Convert the date to IST
-  const istDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-
-  // Format the date to "DD MMM"
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    timeZone: "Asia/Kolkata", // Ensure formatting in IST
-  });
-
-  return formatter.format(istDate);
-}
-
-export function extractTimeAndName(input:string) {
-  const pattern = /\|(\d{2}:\d{2})\|([^|]+)/g;
-  // eslint-disable-next-line prefer-const
-  let resulta = [];
-  let match;
+  const date = parse(inputDateStr, 'dd/MM/yyyy HH:mm', new Date());
+  const formattedDate = format(date, 'dd MMM');
   
-  while ((match = pattern.exec(input)) !== null) {
-    const time = match[1].trim();
-    const name = match[2].trim();
-    resulta.push({ time, name });
-  }
-  
-  return resulta;
+  return formattedDate;
 }
 
 
@@ -257,3 +228,32 @@ export const parseBookedSeats = (inputString: string | null): BookedSeat[] => {
 
   return result;
 };
+
+// Extracting scheduleId, totalSeats, and seat numbers
+export const extractDetails = (passengerList:PassengerInformation[]) => {
+  // Extract the scheduleId from the first object (assuming they all have the same scheduleId)
+  const scheduleId = passengerList[0]?.scheduleId || "Not Available";
+
+  // Calculate total seats
+  const totalSeats = passengerList.length;
+
+  // Extract seat numbers
+  const seatNumbers = passengerList.map((p) => p.seat_no);
+
+  return { scheduleId, totalSeats, seatNumbers };
+};
+
+export function extractTimeAndName(input:string) {
+  const pattern = /\|(\d{2}:\d{2})\|([^|]+)/g;
+  // eslint-disable-next-line prefer-const
+  let resulta = [];
+  let match;
+  
+  while ((match = pattern.exec(input)) !== null) {
+    const time = match[1].trim();
+    const name = match[2].trim();
+    resulta.push({ time, name });
+  }
+  
+  return resulta;
+}

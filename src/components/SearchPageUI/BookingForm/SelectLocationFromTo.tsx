@@ -38,7 +38,7 @@ const SelectLocationFromTo = ({
   // };
 
   const handleSelectCity = (city: CityPropsType) => {
-    console.log("filteredCities",city)
+
     OnChange(city);
     setShowDropdown(false);
     setSearchTerm("");
@@ -78,15 +78,15 @@ const SelectLocationFromTo = ({
         ref={dropdownRef}
         onClick={() => setShowDropdown(!showDropdown)}
         className={cn(
-          "flex flex-col items-start bg-white border border-gray-600 rounded-lg p-2 cursor-pointer h-[3.7rem] pl-2",
+          "flex flex-col items-start bg-white border border-gray-600 rounded-lg p-0 cursor-pointer h-[3.7rem] pl-2",
           isError && "text-red-600 border-red-600"
         )}
       >
         {/* <span className={cn("text-gray-500 text-xs", isError && "text-red-600",)}>
          {labelText2}  {isError && "- Required*"}
         </span> */}
-        <span className="text-gray-700 line-clamp-3 flex items-center gap-3 leading-10 font-bold justify-between w-full">
-          <div className="line-clamp-3 flex items-center gap-3 leading-10 font-bold">
+        <div className="text-gray-700 line-clamp-2 flex items-center gap-3 font-bold justify-between w-full break-words h-[60px]">
+          <div className="line-clamp-2 flex items-center gap-3 leading-[1.5rem] font-bold flex-nowrap h-[3.7rem]">
             {selectFor === "pick-up" ? (
               <TrendingUp size={18} />
             ) : (
@@ -95,7 +95,7 @@ const SelectLocationFromTo = ({
             {values?.bus_stop_location || lebelText1}
           </div>
           {showDropdown ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-        </span>
+        </div>
         {/* Close Icon to Clear Selection */}
       </div>
       {/* {selectedCity && (

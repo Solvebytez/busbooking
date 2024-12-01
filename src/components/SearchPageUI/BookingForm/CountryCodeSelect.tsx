@@ -62,8 +62,8 @@ const CountryCodeSelect = ({ countryPhoneCodes,values,OnChange,lebelText1, isErr
          {/* <span className={cn("text-gray-500 text-xs", isError && "text-red-600",)}>
          {labelText2}  {isError && "- Required*"}
         </span> */}
-        <span className="text-gray-700 line-clamp-3 flex items-center gap-3 leading-10 font-bold justify-between w-full">
-          <div className="line-clamp-3 flex items-center gap-3 leading-10 font-bold text-sm">
+        <span className="text-gray-700 line-clamp-1 flex items-center gap-3 leading-10 font-bold justify-between w-full">
+          <div className="line-clamp-1 flex items-center gap-3 leading-10 font-bold text-sm">
                   {values || lebelText1}
           </div>
           {showDropdown ? <ChevronUp size={24} /> : <ChevronDown size={24} />}

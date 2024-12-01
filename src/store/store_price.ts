@@ -9,7 +9,7 @@ export type SeatData = {
   tripType: TripType;
 };
 
-type SeatStore = {
+export type SeatStore = {
   data: SeatData[];
   totalSeatPrice: number;
   totalGst: number;

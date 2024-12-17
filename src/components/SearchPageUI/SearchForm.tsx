@@ -59,6 +59,8 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
   const [singleLady, setIsSignleLady] = useState<boolean>(false);
 
   const departureDates = searchParams.get("departureDate");
+  const toCityId = searchParams.get("toCityId");
+  const fromCityId = searchParams.get("fromCityId");
   // const formattedDepartureDate = departureDates
   //   ? new Date(departureDates)
   //   : undefined;
@@ -202,12 +204,12 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
       changeCityId = fromCity?.id
     }
 
-    console.log("isSame",changeCityId)
+    console.log("isSameeeeeeeeeeeeeee",fromCity)
 
     const filterData = {
       onward_date: formatDate,
-      origin: Number(changeCityId),
-      destination: Number(toCity?.id),
+      origin: Number(changeCityId??fromCityId),
+      destination: Number(toCity?.id??toCityId),
     };
 
     console.log("filterDatasearchForm",filterData)

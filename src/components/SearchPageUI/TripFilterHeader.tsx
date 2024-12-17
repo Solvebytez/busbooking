@@ -5,8 +5,7 @@ import useOnwardTripStore from "@/store/onwardTripStore";
 import useSearchParamsStore from "@/store/useSearchParamsStore";
 import {
   ArrowDownUp,
-  ChevronLeft,
-  ChevronRight,
+
   ChevronsUpDown,
 } from "lucide-react";
 

@@ -254,23 +254,14 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
     return new Map(cities.map((city: CityPropsType) => [city.id, city]));  // Map city.id to the full city object
   }, [allcities]);
 
-  const handleInputChange = (name: string, value: any) => {
+  const handleInputChange = (name: string, value: CityPropsType | null) => {
     const params = new URLSearchParams(searchParams.toString());
     console.log("cityMap", cityMap);
   
     if (value) {
-      // When value is an object of type CityPropsType
       if (name === "fromCityId" || name === "toCityId") {
-        // Using cityMap to find the city object by id
-        const city: CityPropsType = cityMap.get(value);
-
-        console.log("city", city);
-        // Ensure the city exists and is of the correct type
+        const city = value;
         if (city && typeof city.city_name === "string") {
-          // Check if the fromCityId and toCityId are the same
-
-
-          // Set both city ID and city name in the query string
           if (name === "fromCityId") {
             params.set("fromCityId", city.id.toString());
             params.set("fromCity", city.city_name);
@@ -286,21 +277,16 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
             (name === "toCityId" && params.get("fromCityId") === city.id.toString())
           ) {
             alert("From city and To city cannot be the same.");
-            params.set("fromCityId", (city.id+1).toString())
-            return; // Prevent the update
+            params.set("fromCityId", (Number(city.id) + 1).toString());
+            return;
           }
         }
       }
 
     } else {
-      // If value is a primitive type (for other fields), just set the param
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
+      params.delete(name);
     }
-    // // Push the updated query string to the URL
+
     router.push(`?${params.toString()}`);
   };
 
@@ -332,7 +318,7 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
                   isError={errors?.fromCity?.message}
                   OnChange={(value: CityPropsType | null) => {
                     setCustomValue("fromCity", value);
-                    handleInputChange("fromCityId", value?.id as number);
+                    handleInputChange("fromCityId", value);
                   }}
                   lebelText1="Select Departure City"
                   labelText2="Leaving From"
@@ -349,7 +335,7 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
                   isError={errors?.toCity?.message}
                   OnChange={(value: CityPropsType | null) => {
                     setCustomValue("toCity", value);
-                    handleInputChange("toCityId", value?.id);
+                    handleInputChange("toCityId", value);
                   }}
                   isDisabled={allcities?.data && !fromCity}
                   {...register("toCity", { required: "To city is required" })}

@@ -21,6 +21,8 @@ import { useStore } from "@/store/storeFilterData";
 import { DateFormatter } from "../Global/DateFormatter";
 import { usePriceRangeStore } from "@/store/priceRange";
 
+import BusSkeletonList from "@/app/search/BusDetailsSkeleton";
+
 export const options = [
   "Boarding Points",
   "Cancellation Policy",
@@ -78,7 +80,7 @@ const SearchResultConatiner = () => {
     // // "price_range_max": 600
   });
 
-  console.log("filterData", maxPrice, minPrice);
+  console.log("prevScheduleId", prevScheduleId);
 
   // Use the query hook
   const { data, error, isLoading } = useFilterData({
@@ -117,7 +119,7 @@ const SearchResultConatiner = () => {
             </div>
             <div className="col-span-9  w-[80%]">
               {isLoading
-                ? "Loading....."
+                ? (<BusSkeletonList/>)
                 : schedulesList?.map((schedule) => {
                     const boardingStages =
                       allcityList &&

@@ -4,7 +4,7 @@
 import { Armchair, Clock, MapPinned } from "lucide-react";
 import Amenities from "../Amenities";
 import BusSlider from "./BusSlider";
-import BusSeats from "./BusSeats";
+
 import BookingForm from "../BookingForm/BookingForm";
 import { useEffect, useState } from "react";
 
@@ -16,16 +16,14 @@ import {
   convertStringToArrayOfObjects,
   convertToArrayString,
   extractTimeAndName,
-  findAvailableSeatArray,
-  parseBookedSeats,
   SeatData,
 } from "@/lib/utils";
 import Passenger_DetailForm from "../BookingForm/Passenger_Detail";
 import { useGetScheduleById } from "@/ClientApi/scheduleList";
 import { CityPropsType } from "@/components/Input/SelectInput";
-import { TripType } from "@/components/Form/TicketBookingForm";
-import { useSearchParams } from "next/navigation";
+
 import useDropOffStore from "@/store/boarding_dropOff_store";
+import { BusLayout } from "./Seats/BusSeatNew";
 
 export enum BusOption {
   BOARDING_POINTS = "Boarding Points",
@@ -57,8 +55,7 @@ const AdditionalBusInfo = ({
  
  
 
-  const searchParams = useSearchParams();
-  const tripTypeUri = searchParams.get("tripType") ?? TripType.one_way;
+
   const { setBoardingPoint,setDropOffList } = useDropOffStore();
   const {
     data: singleschedule,
@@ -232,17 +229,17 @@ const AdditionalBusInfo = ({
       bus_layout.dropoff_stages,'droping_stopies'
     );
 
-    const availableSeatForOneWay = findAvailableSeatArray(
-      bus_layout.available,
-      bus_layout.available_gst,
-      tripTypeUri as TripType
-    );
+    // const availableSeatForOneWay = findAvailableSeatArray(
+    //   bus_layout.available,
+    //   bus_layout.available_gst,
+    //   tripTypeUri as TripType
+    // );
 
-    const booked_gents_seat = parseBookedSeats(bus_layout.gents_booked_seats)
-    const booked_ladies_seat = parseBookedSeats(bus_layout.ladies_booked_seats)
+    // const booked_gents_seat = parseBookedSeats(bus_layout.gents_booked_seats)
+    // const booked_ladies_seat = parseBookedSeats(bus_layout.ladies_booked_seats)
 
  
-
+    console.log("selectedSeats",selectedSeats)
    
     return (
       <div className="flex flex-col ">
@@ -252,7 +249,9 @@ const AdditionalBusInfo = ({
             <span className="w-[40px] h-[40px] rounded-full bg-primary flex items-center justify-center">
               <Armchair size={25} className="text-white" />
             </span>{" "}
-            Select Seat
+            Select{selectedSeats.length > 0&&'ed'} Seat{selectedSeats.length > 0&&':'} {selectedSeats.length > 0
+            ? selectedSeats.map((item) =>  item.seat).join(", ")
+            : ''}
           </div>
           <div className="w-[33%] font-semibold text-secondary flex items-center gap-2">
             {" "}
@@ -264,14 +263,16 @@ const AdditionalBusInfo = ({
         </div>
         <div className="flex gap-5 min-h-[25rem]">
           <div className="w-[65%]">
-            <BusSeats
+            <BusLayout  setSelectSeat={setSelectSeat}
+              selectedSeats={selectedSeats} layout={bus_layout}/>
+            {/* <BusSeats
               availableSeatForOneWay={availableSeatForOneWay}
               scheduleId={scheduleId}
               setSelectSeat={setSelectSeat}
               selectedSeats={selectedSeats}
               booked_gents_seat={booked_gents_seat}
               booked_ladies_seat={booked_ladies_seat}
-            />
+            /> */}
           </div>{" "}
           <div className="w-[35%]">
             <BookingForm            

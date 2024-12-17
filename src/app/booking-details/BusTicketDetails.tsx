@@ -29,7 +29,7 @@ const BusTicketDetails = ({detailsType,onwordsSearch,passenger_information,board
     [fromCity, toCity] = [toCity, fromCity];
   }
 
-  const { scheduleId, totalSeats, seatNumbers } = extractDetails(passenger_information);
+  const { totalSeats, seatNumbers } = extractDetails(passenger_information);
 
   return (
     <div className="w-full mx-auto p-4  bg-white">

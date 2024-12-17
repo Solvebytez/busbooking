@@ -210,6 +210,8 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
       destination: Number(toCity?.id),
     };
 
+    console.log("filterDatasearchForm",filterData)
+
     setFilterData({ ...filterData });
     const params = {
       fromCityId: searchParams.get('fromCityId'),
@@ -261,20 +263,19 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
       if (name === "fromCityId" || name === "toCityId") {
         // Using cityMap to find the city object by id
         const city: CityPropsType = cityMap.get(value);
-  
+
         console.log("city", city);
-  
         // Ensure the city exists and is of the correct type
         if (city && typeof city.city_name === "string") {
           // Check if the fromCityId and toCityId are the same
-         
-  
+
+
           // Set both city ID and city name in the query string
           if (name === "fromCityId") {
             params.set("fromCityId", city.id.toString());
             params.set("fromCity", city.city_name);
           }
-  
+
           if (name === "toCityId") {
             params.set("toCityId", city.id.toString());
             params.set("toCity", city.city_name);
@@ -290,6 +291,7 @@ const SearchForm = ({ setFilterData, getAllCityList }: SearchFormProps) => {
           }
         }
       }
+
     } else {
       // If value is a primitive type (for other fields), just set the param
       if (value) {

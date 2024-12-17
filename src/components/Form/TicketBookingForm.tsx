@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-toastify";
 import { useGetAllCities } from "@/ClientApi/cities";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import TravelFormSkeleton from "../Global/TravelFormSkeleton";
 import useOnwardTripStore from "@/store/onwardTripStore";
 import Link from "next/link";
@@ -36,7 +36,7 @@ type TicketBookingFormProps = {
 
 const TicketBookingForm = () => {
   const { data: allcities, isLoading, isError } = useGetAllCities();
-  const router = useRouter();
+  // const router = useRouter();
   const {   setOnwardTrip, setParsedOnwardTrip } = useOnwardTripStore();
   const {setSelectedBusTypes,setSelectedDepartureTimes} = useStore()
   // Filter the toCity options based on the selected fromCity
@@ -112,8 +112,8 @@ const TicketBookingForm = () => {
     //   // Save it in localStorage
     //   localStorage.setItem("Onward_Trip", JSON.stringify(onwardTripData));
     // }
-
-    router.push(`/search?${queryParams.toString()}`);
+// Redirect to the search page with the query parameters
+window.location.href = `/search?${queryParams.toString()}`;
   };
 
   // Watch for changes in 'fromCity' and filter 'toCity' accordingly

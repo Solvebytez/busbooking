@@ -227,6 +227,11 @@ const total = oneWaySubtotal + returnWaySubtotal;
                 />
               </div>
               <Separator className="my-4" />
+              {onwardPassengers.length > 0 &&  <h3 className="text-lg font-semibold">
+                    Onward Trip Passengers Review
+                  </h3> }
+
+
               {alloneWayData?.passenger_information && (
                 <BusTicketDetails
                   detailsType="oneWayData"
@@ -240,9 +245,7 @@ const total = oneWaySubtotal + returnWaySubtotal;
               {/* Onward Trip */}
               {onwardPassengers.length > 0 && (
                 <div className="space-y-4 p-5 bg-green-100/10">
-                  <h3 className="text-lg font-semibold">
-                    Onward Trip Passengers Review
-                  </h3>
+                 
                   {form.watch("onwardPassengers")?.map((_, index) => (
                     <Card
                       key={index}

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -21,29 +23,16 @@ import useSearchParamsStore from "@/store/useSearchParamsStore";
 import { TripType } from "@/components/Form/TicketBookingForm";
 import { useRouter } from "next/navigation";
 
-// Schema for additional passengers (optional fields)
-const additionalPassengerSchema = z.object({
-  seat_no: z.string(),
-  name: z.string().optional(),
-  gender: z.string().optional(),
-  age: z.number().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  seat_price: z.number(),
-  seat_gst: z.number(),
-  scheduleId: z.string(),
-  tripType: z.string(),
-});
-
-// Schema for the first passenger (required fields)
-const firstPassengerSchema = z.object({
+const passengerSchema = z.object({
   seat_no: z.string(),
   name: z.string().min(1, "Name is required"),
   gender: z.string().min(1, "Gender is required"),
-  age: z.number({
-    required_error: "Age is required",
-    invalid_type_error: "Age must be a number",
-  }).min(1, "Age must be at least 1"),
+  age: z
+    .number({
+      required_error: "Age is required",
+      invalid_type_error: "Age must be a number",
+    })
+    .min(1, "Age must be at least 1"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   seat_price: z.number(),
@@ -53,21 +42,7 @@ const firstPassengerSchema = z.object({
 });
 
 const formSchema = z.object({
-  passengers: z.array(z.union([
-    firstPassengerSchema,
-    additionalPassengerSchema
-  ])).refine((data) => {
-    // Ensure at least the first passenger's data is filled
-    const firstPassenger = data[0];
-    return firstPassenger && 
-           firstPassenger.name && 
-           firstPassenger.gender && 
-           firstPassenger.age && 
-           firstPassenger.city && 
-           firstPassenger.state;
-  }, {
-    message: "At least One passenger details are required"
-  })
+  passengers: z.array(passengerSchema),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -80,10 +55,10 @@ const Passenger_DetailForm = ({
   scheduleId: string;
 }) => {
   const { selected_boardingPoint, selected_dropOffList } = useDropOffStore();
-  const { parsedOnwardTrip } = useOnwardTripStore();
-  const { data: seatData, subTotal, totalGst, totalSeatPrice } = usePriceStore();
+  const { onwardTrip, parsedOnwardTrip } = useOnwardTripStore();
+  const { data:seatData, subTotal, totalGst, totalSeatPrice } = usePriceStore();
   const onwordsSearch = useSearchParamsStore();
-  const router = useRouter();
+  const router = useRouter()
 
   const {
     control,
@@ -112,109 +87,149 @@ const Passenger_DetailForm = ({
     name: "passengers",
   });
 
-  const onSubmit = (data: FormValues, type: TripType) => {
+  const onSubmit = (data: FormValues,type:TripType) => {
     toast.success("Form Submitted successfully!");
-
-
-    
+    // Handle form submission here (e.g., API call, state update, etc.)
+   
     if (
-      typeof window !== "undefined" &&
-      (window.localStorage.getItem("one_way") ||
-        window.localStorage.getItem("round_trip"))
+      (typeof window !== "undefined" &&      
+      window.localStorage.getItem("one_way") ||
+      window.localStorage.getItem("round_trip"))
     ) {
+      console.log("Page changed. Removing tripData...");
+     
       window.localStorage.removeItem("one_way");
       window.localStorage.removeItem("round_trip");
     }
 
-    const localStorageData = {
-      selected_boardingPoint,
-      selected_dropOffList,
-      parsedOnwardTrip,
-      priceData: { seatData, subTotal, totalGst, totalSeatPrice },
-      onwordsSearch,
-      passenger_information: [...data.passengers],
-    };
-
-    if (type === "one_way") {
+    if(type==="one_way"){
+      // toast.success("one_way Form submitted successfully!");
+      const localStorageData = {
+        selected_boardingPoint,
+        selected_dropOffList,      
+        parsedOnwardTrip,
+        priceData: { seatData, subTotal, totalGst, totalSeatPrice },
+        onwordsSearch,
+        passenger_information:[...data.passengers]
+      };
+    
+      // Save the serialized data to localStorage
       localStorage.setItem("one_way", JSON.stringify(localStorageData));
-    } else if (type === "round_trip") {
-      const tripTypeforRound = window.localStorage.getItem("Onward_Trip")
-        ? "round_trip"
-        : "Onward_Trip";
-      localStorage.setItem(tripTypeforRound, JSON.stringify(localStorageData));
+
     }
 
-    if (!window.localStorage.getItem("Onward_Trip") && type !== "one_way") {
-      window.location.reload();
-    } else {
-      router.replace("booking-details");
+    if(type==="round_trip"){
+      // toast.success("round_trip Form submitted successfully!");
+      let tripTypeforRound;
+      if(window.localStorage.getItem("Onward_Trip")){
+        tripTypeforRound="round_trip"
+
+      }else{
+         tripTypeforRound="Onward_Trip"
+      }
+      const localStorageData = {
+        selected_boardingPoint,
+        selected_dropOffList,      
+        parsedOnwardTrip,
+        priceData: { seatData, subTotal, totalGst, totalSeatPrice },
+        onwordsSearch,
+        passenger_information:[...data.passengers]
+      };
+    
+      // Save the serialized data to localStorage
+      localStorage.setItem(tripTypeforRound, JSON.stringify(localStorageData));
+     
     }
+    if (!window.localStorage.getItem("Onward_Trip") && type!=="one_way") {
+      // If data exists, reload the page
+      window.location.reload();
+    
+    } else {
+      // If no data exists, redirect to a different page
+      router.replace("booking-details"); // Change the URL here as needed
+    }
+   
   };
 
   const onSaveData = (data: FormValues) => {
     toast.success("Onwords Details Saved! Please book return seat!");
 
+   
     if (
-      typeof window !== "undefined" &&
-      (window.localStorage.getItem("Onward_Trip") ||
-        window.localStorage.getItem("one_way") ||
-        window.localStorage.getItem("round_trip"))
+      (typeof window !== "undefined" &&
+        window.localStorage.getItem("Onward_Trip")) ||
+      window.localStorage.getItem("one_way") ||
+      window.localStorage.getItem("round_trip")
     ) {
+      console.log("Page changed. Removing tripData...");
       window.localStorage.removeItem("Onward_Trip");
       window.localStorage.removeItem("one_way");
       window.localStorage.removeItem("round_trip");
     }
 
+  
     const localStorageData = {
       selected_boardingPoint,
-      selected_dropOffList,
+      selected_dropOffList,      
       parsedOnwardTrip,
       priceData: { seatData, subTotal, totalGst, totalSeatPrice },
       onwordsSearch,
-      passenger_information: [...data.passengers],
+       passenger_information:[...data.passengers]
     };
-
+  
+    // Save the serialized data to localStorage
     localStorage.setItem("Onward_Trip", JSON.stringify(localStorageData));
+    // Handle form submission here (e.g., API call, state update, etc.)
     window.location.reload();
   };
 
   const getErrorMessages = () => {
     const errorMessages: string[] = [];
-    if (errors.passengers) {
-      // Only show errors for the first passenger
-      const firstPassengerErrors = errors.passengers[0];
-      if (firstPassengerErrors && typeof firstPassengerErrors === "object") {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        Object.entries(firstPassengerErrors).forEach(([_, errorValue]) => {
-          if (
-            errorValue &&
-            typeof errorValue === "object" &&
-            "message" in errorValue &&
-            typeof errorValue.message === "string"
-          ) {
-            errorMessages.push(errorValue.message);
+    if (errors && errors.passengers) {
+      (errors.passengers as any[]).forEach(
+        (passengerErrors, passengerIndex) => {
+          if (passengerErrors && typeof passengerErrors === "object") {
+            Object.entries(passengerErrors).forEach(
+              ([errorKey, errorValue]) => {
+                if (
+                  errorValue &&
+                  typeof errorValue === "object" &&
+                  "message" in errorValue &&
+                  typeof errorValue.message === "string"
+                ) {
+                  // Handle error message
+                  errorMessages.push(
+                    `Passenger ${passengerIndex + 1}: ${errorValue.message}`
+                  );
+                }
+              }
+            );
           }
-        });
-      }
+        }
+      );
     }
     return errorMessages;
   };
+  const isPassengerDetailHas =
+    Object.keys(parsedOnwardTrip).length > 1 ? true : false;
 
-  const isPassengerDetailHas = Object.keys(parsedOnwardTrip).length > 1;
+    const handleFormSubmit = (data: FormValues) => {
 
-  const handleFormSubmit = (data: FormValues) => {
-    if (isPassengerDetailHas && onwordsSearch.tripType !== "one_way") {
-      if (onwordsSearch.tripType === "round_trip" && onwordsSearch.returnDate) {
-        onSubmit(data, "round_trip" as TripType);
+      console.log("onwordsSearch.tripType",onwordsSearch.tripType,parsedOnwardTrip)
+      if (isPassengerDetailHas && onwordsSearch.tripType !== "one_way") {
+        if (onwordsSearch.tripType === "round_trip" && onwordsSearch.returnDate) {
+          onSubmit(data,"round_trip" as TripType);
+        } else {
+          onSaveData(data);
+        }
+      } else if (onwordsSearch.tripType === "one_way") {
+        onSubmit(data,'one_way' as TripType);
       } else {
         onSaveData(data);
       }
-    } else if (onwordsSearch.tripType === "one_way") {
-      onSubmit(data, "one_way" as TripType);
-    } else {
-      onSaveData(data);
-    }
-  };
+    };
+
+
 
   return (
     <form
@@ -222,8 +237,8 @@ const Passenger_DetailForm = ({
       className="w-full mx-auto p-6 space-y-6 bg-white"
     >
       <h2 className="text-lg font-medium">
-        Make changes to your account here. Click PROCEED TO Passenger detail when
-        {"you're"} done.
+        Make changes to your account here. Click PROCEED TO Passenger detail
+        when {"you're"} done.
       </h2>
 
       {fields.map((field, index) => (
@@ -246,7 +261,7 @@ const Passenger_DetailForm = ({
                 {...field}
                 placeholder="Enter Name"
                 className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.name}
+                aria-invalid={!!errors.passengers?.[index]?.name}
               />
             )}
           />
@@ -258,7 +273,7 @@ const Passenger_DetailForm = ({
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger
                   className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                  aria-invalid={index === 0 && !!errors.passengers?.[0]?.gender}
+                  aria-invalid={!!errors.passengers?.[index]?.gender}
                 >
                   <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>
@@ -280,9 +295,11 @@ const Passenger_DetailForm = ({
                 type="number"
                 placeholder="Age"
                 className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.age}
+                aria-invalid={!!errors.passengers?.[index]?.age}
                 onChange={(e) =>
-                  field.onChange(e.target.value ? parseInt(e.target.value, 10) : 0)
+                  field.onChange(
+                    e.target.value ? parseInt(e.target.value, 10) : 0
+                  )
                 }
               />
             )}
@@ -296,7 +313,7 @@ const Passenger_DetailForm = ({
                 {...field}
                 placeholder="Enter City"
                 className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.city}
+                aria-invalid={!!errors.passengers?.[index]?.city}
               />
             )}
           />
@@ -309,7 +326,7 @@ const Passenger_DetailForm = ({
                 {...field}
                 placeholder="Enter State"
                 className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.state}
+                aria-invalid={!!errors.passengers?.[index]?.state}
               />
             )}
           />
@@ -359,15 +376,15 @@ const Passenger_DetailForm = ({
       onwordsSearch.tripType === TripType.round_trip &&
       !isPassengerDetailHas ? (
         <Button
-          className="w-full bg-primary hover:bg-orange-700 text-white"
-          type="submit"
+           className="w-full bg-primary hover:bg-orange-700 text-white"
+            type="submit"
         >
           Click here to procced
         </Button>
       ) : (
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-orange-700 text-white"
+          className="w-full bg-primary hover:bg-orange-700"
           disabled={getErrorMessages().length > 0}
         >
           Proceed To Checkout
@@ -378,4 +395,3 @@ const Passenger_DetailForm = ({
 };
 
 export default Passenger_DetailForm;
-

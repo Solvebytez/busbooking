@@ -36,6 +36,8 @@ export default function BusSeats({
     }
   };
 
+  console.log("setSelectSeat",availableSeatForOneWay);
+
   return (
     <div className="w-full mx-auto p-0">
       <div className="relative border rounded-lg p-8 bg-background">

@@ -11,7 +11,7 @@ import {
   getLowestPrice,
   parseCityData,
 } from "@/lib/utils";
-import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";
+// import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";
 import useFilterData, {
   BusService,
   FilterData,

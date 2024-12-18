@@ -38,6 +38,7 @@ function BusSlider() {
     slidesToScroll: 1,
     waitForAnimate: false
   };
+      return <div>No Image available</div>
   return (
     <div className="slider-container w-[70%] h-[29rem] m-auto">
       <Slider {...settings}>

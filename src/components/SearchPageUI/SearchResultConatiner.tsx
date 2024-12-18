@@ -137,7 +137,8 @@ const SearchResultConatiner = () => {
                         <div className="flex justify-start">
                           <div className="w-[34.5%]">
                             <h2 className="flex gap-2 text-primary/90 font-bold items-center text-xl">
-                              {schedule.name} <BusInfoModal />
+                              {schedule.operator_service_name} 
+{/*                             <BusInfoModal /> */}
                             </h2>
                           </div>
                           <div>

@@ -6,6 +6,8 @@ import {
   CloudMoon,
 
   Moon,
+  Square,
+  SquareCheck,
   Sun,
   Sunrise,
 } from "lucide-react";
@@ -52,85 +54,90 @@ const FilterComponent = () => {
   console.log("selectedDepartureTimes",selectedBusTypes)
 
   return (
-    <div className="p-2 w-full bg-white border rounded-lg shadow-md">
+    <div className="p-4 w-full bg-white border rounded-sm">
       {/* Filter By Header */}
-      <div className="flex justify-between items-center border-b pb-2 mb-4">
-        <h2 className="font-semibold text-secondary">Filter By</h2>
+      <div className="flex justify-between items-center border-b pb-2 mb-0">
+        <h2 className="font-semibold uppercase text-[13px] text-gray-700">Filter By</h2>
         <button
           onClick={clearAll}
-          className="text-blue-600 hover:underline font-bold"
+          className="text-blue-500 hover:underline font-semibold uppercase text-[13px]"
         >
           Clear All
         </button>
       </div>
 
       {/* Bus Type Section */}
-      <div className="mb-6 p-3 bg-secondary/15 rounded-sm">
+      <div className=" py-3 rounded-sm mb-0">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold text-secondary">Bus Type</h3>
+          <h3 className="font-semibold uppercase text-[13px] text-gray-700">Bus Types</h3>
           {/* <button
             onClick={() => {
               // clearAll(setSelectedBusTypes)
             }}
-            className="text-blue-600 hover:underline font-bold"
+            className="text-blue-500 hover:underline font-bold"
           >
             Clear All
           </button> */}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-1">
           {busTypes.map((type) => (
             <button
               key={type}
               onClick={() =>
                 toggleSelection(type, selectedBusTypes, setSelectedBusTypes)
               }
-              className={`p-2 flex flex-col items-center justify-center border rounded ${
+              className={`pb-2 flex gap-1 items-center justify-start rounded text-xs text-gray-500 ${
                 selectedBusTypes.includes(type)
-                  ? "bg-secondary text-white"
+                  ? " text-gray-500"
                   : "bg-white"
               }`}
             >
+              {
+                  selectedBusTypes.includes(type)
+                  ?  <SquareCheck size={16} />
+                  : <Square size={16} className="text-gray-400" />
+              }
               {type === "AC" && (
                 <AirVent
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedBusTypes.includes(type)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {type === "Non AC" && (
                 <AirVent
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedBusTypes.includes(type)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {type === "Seater" && (
                 <Armchair
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedBusTypes.includes(type)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {type === "Sleeper" && (
                 <Bed
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedBusTypes.includes(type)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
@@ -141,19 +148,19 @@ const FilterComponent = () => {
       </div>
 
       {/* Departure Time Section */}
-      <div className="mb-6 p-3 bg-secondary/15 rounded-sm">
+      <div className="mb-0 rounded-sm">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold text-secondary">Departure Time</h3>
+          <h3 className="font-semibold uppercase text-[13px] text-gray-700">Departure Time</h3>
           {/* <button
             onClick={() => {
               // clearAll(setSelectedDepartureTimes)
             }}
-            className="text-blue-600 hover:underline font-bold"
+            className="text-blue-500 hover:underline font-bold"
           >
             Clear All
           </button> */}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-1">
           {departureTimes.map((time) => (
             <button
               key={time}
@@ -164,53 +171,58 @@ const FilterComponent = () => {
                   setSelectedDepartureTimes
                 )
               }
-              className={`p-2 flex flex-col items-center justify-center border rounded ${
+              className={`pb-2 flex gap-1 items-center justify-start rounded text-xs text-gray-500 ${
                 selectedDepartureTimes.includes(time)
-                  ? "bg-secondary text-white"
+                  ? "text-gray-500"
                   : "bg-white"
               }`}
             >
+               {
+                  selectedDepartureTimes.includes(time)
+                  ?  <SquareCheck size={16} />
+                  : <Square size={16} className="text-gray-400" />
+              }
               {time === "isBeforeTen" && (
                 <Sunrise
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedDepartureTimes.includes(time)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {time === "tenToFive" && (
                 <Sun
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedDepartureTimes.includes(time)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {time === "fiveToEleven" && (
                 <CloudMoon
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedDepartureTimes.includes(time)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
               {time === "afterEleven" && (
                 <Moon
-                  size={23}
+                  size={15}
                   className={cn(
                     "",
                     selectedDepartureTimes.includes(time)
-                      ? "text-white"
-                      : "text-secondary"
+                      ? "text-gray-500"
+                      : "text-gray-500"
                   )}
                 />
               )}
@@ -226,13 +238,13 @@ const FilterComponent = () => {
 
       {/* Price Range Section */}
       <PriceRangeFilter />
-      {/* <div className="mb-4 bg-secondary/15 px-2 py-2 rounded-sm">
+      {/* <div className="mb-4 bg-gray-500/15 px-2 py-2 rounded-sm">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold text-secondary">Price Range</h3>
+          <h3 className="font-semibold text-gray-500">Price Range</h3>
         </div>
         <div className="flex w-full flex-col">
-          <div className="flex justify-between text-secondary font-semibold mt-2 w-full my-4">
-            <div className="border border-secondary flex items-center justify-center w-[30%] h-[45px] rounded-sm">
+          <div className="flex justify-between text-gray-500 font-semibold mt-2 w-full my-4">
+            <div className="border border-gray-500 flex items-center justify-center w-[30%] h-[45px] rounded-sm">
               <IndianRupee size={14} />
               <input
                 value={pricevalue[0]}
@@ -241,7 +253,7 @@ const FilterComponent = () => {
                 className="text-center rounded-sm w-[100%] h-full focus:border-none border-none focus:outline-none !focus-visible:ring-0 px-2"
               />
             </div>
-            <div className="border border-secondary flex items-center justify-center w-[30%] rounded-sm">
+            <div className="border border-gray-500 flex items-center justify-center w-[30%] rounded-sm">
               <IndianRupee size={14} />
               <input
                 value={pricevalue[1]}
@@ -258,7 +270,7 @@ const FilterComponent = () => {
             rangeSlideDisabled={true}
             onValueChange={() => {}}
           />
-          <div className="flex justify-between text-secondary font-semibold mt-2">
+          <div className="flex justify-between text-gray-500 font-semibold mt-2">
             <span>{pricevalue[0]}</span>
             <span>{pricevalue[1]}</span>
           </div>

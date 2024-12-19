@@ -22,7 +22,7 @@ export default async  function SearchPage({ searchParams }: { searchParams: Prom
   }
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen">
+    <div className="bg-[#fff] min-h-screen">
       <Suspense fallback={"dsgsdf"}>
         <SearchResultConatiner  />
       </Suspense>

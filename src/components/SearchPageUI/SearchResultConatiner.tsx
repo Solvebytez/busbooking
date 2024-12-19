@@ -4,21 +4,22 @@ import React, { useCallback, useEffect, useState } from "react";
 import TripFilterHeader from "./TripFilterHeader";
 import SearchForm from "./SearchForm";
 import SidebarFilter from "./SidebarFilter";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, LocateFixed } from "lucide-react";
 import AdditionalBusInfo from "./SearchAdditionalComp/AdditionalBusInfo";
 import {
   cn, 
+  formatDateToIST, 
   getLowestPrice,
   parseCityData,
 } from "@/lib/utils";
-import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";
+// import BusInfoModal from "./SearchAdditionalComp/BusInfoModal";
 import useFilterData, {
   BusService,
   FilterData,
 } from "@/ClientApi/scheduleList";
 import { CityPropsType } from "../Input/SelectInput";
 import { useStore } from "@/store/storeFilterData";
-import { DateFormatter } from "../Global/DateFormatter";
+// import { DateFormatter } from "../Global/DateFormatter";
 import { usePriceRangeStore } from "@/store/priceRange";
 
 import BusSkeletonList from "@/app/search/BusDetailsSkeleton";
@@ -102,7 +103,7 @@ const SearchResultConatiner = () => {
   //   return <div>Loading...</div>;
   // }
 
-  console.log("data", data?.highestFare,data?.lowestFare," maxPrice,",  maxPrice," minPrice", minPrice);
+  console.log("schedulesList", schedulesList);
 
   return (
     <div>
@@ -110,14 +111,15 @@ const SearchResultConatiner = () => {
         setFilterData={setFilterData}
         getAllCityList={setAllCityList!}
       />
-      <TripFilterHeader />
+    
       <div className="px-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
         <div className="w-full md:px-[1rem] xl:px-[4rem]">
           <div className="flex gap-4">
-            <div className="flex flex-col w-[20%] mb-10">
+            <div className="flex flex-col w-[20%] mb-10 mt-5">
               <SidebarFilter/>
             </div>
             <div className="col-span-9  w-[80%]">
+            <TripFilterHeader schedulesListCount={schedulesList.length} />
               {isLoading
                 ? (<BusSkeletonList/>)
                 : schedulesList?.map((schedule) => {
@@ -131,103 +133,122 @@ const SearchResultConatiner = () => {
                     return (
                       <div
                         key={schedule.id}
-                        className="shadow-md p-3 bg-white rounded-md mb-8"
+                        className="shadow-none px-3 pt-3 bg-white rounded-sm mb-4 border"
                       >
                         {/* First Row */}
                         <div className="flex justify-start">
-                          <div className="w-[34.5%]">
-                            <h2 className="flex gap-2 text-primary/90 font-bold items-center text-xl">
-                              {schedule.name} <BusInfoModal />
+                          <div className="w-[37%]">
+                            <h2 className="flex gap-2 text-gray-700 font-semibold items-center text-sm capitalize">
+                              <div>{schedule.operator_service_name} </div>
+                           
                             </h2>
                           </div>
-                          <div>
-                            <h2 className="text-primary/90 font-bold items-center text-xl">
-                              {schedule.bus_type}
+                          <div className="w-[20%]">
+                            <h2 className="text-gray-500 flex flex-col justify-start text-xs">
+                            <div className="text-gray-700 font-semibold items-center text-[16px] capitalize">{schedule.dep_time}</div> 
+                            </h2>
+                           
+                          </div>
+                          <div className="w-[20%]">
+                            <h2 className="text-gray-700 font-semibold items-center text-sm capitalize">
+                            {schedule.duration}HRS
                             </h2>
                           </div>
-                          <div className="ms-auto">
-                            <h2 className="font-bold items-center text-xl">
-                              ₹{getLowestPrice(schedule.fare_str).price}
-                            </h2>
+                          <div className="w-[20%] text-gray-500 flex flex-col justify-start text-xs">
+                          <div className="text-gray-700 font-semibold items-center text-[16px] capitalize">{schedule.arr_time}</div>
+                          {/* {dropoffStages.at(-1)?.cityName} */}
+
+                          </div>
+                          <div className="w-[20%] text-gray-700 font-semibold items-center text-[16px] capitalize pl-2">
+                          ₹{getLowestPrice(schedule.fare_str).price}
+                          </div>
+                          <div className="w-[20%] text-gray-500 flex flex-col justify-start text-sm pl-2">
+                          {schedule.available_seats} Seats Available
                           </div>
                         </div>
 
                         {/* Second Row */}
-                        <div className="flex justify-between mt-4">
+                        <div className="flex justify-start mt-4">
+                          <div className="w-[37%]">
+                            <h2 className="text-gray-500 justify-start text-xs">
+                            {schedule.bus_type}
+                            </h2>
+                          </div>
                           <div className="w-[20%]">
-                            <h2 className="flex gap-2 font-bold items-center">
-                              Starts at
+                            <h2 className="text-gray-500 justify-start text-xs">
+                            {formatDateToIST(schedule.main_dep_time)},{" "}
+                            {boardingStages[0].cityName}
                             </h2>
                           </div>
-                          <div className="w-[15%]">
-                            <h2 className="flex gap-2 font-bold items-center">
-                              Duration
-                            </h2>
-                          </div>
-                          <div className="w-[28%]">
-                            <h2 className="flex gap-2 font-bold items-center">
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
                               Reaches on
+                            </h2> */}
+                          </div>
+                          <div className="w-[20%]">
+                            <h2 className="text-gray-500 justify-start text-xs">
+                            {dropoffStages.at(-1)?.cityName}
                             </h2>
                           </div>
-                          {/* <div className="w-[23%]">
-                            <h2 className="font-bold items-center">Via</h2>
-                          </div> */}
-                          <div className="w-[15%] text-right">
-                            <h2 className="font-bold items-center">
-                              {schedule.status}
-                            </h2>
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
+                              Reaches on
+                            </h2> */}
+                          </div>
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
+                              Reaches on
+                            </h2> */}
                           </div>
                         </div>
 
-                        {/* Third Row */}
-                        <div className="flex justify-between mt-4">
+                         {/* Third Row */}
+                         <div className="flex justify-start mt-4">
+                          <div className="w-[37%]">
+                            <h2 className="text-gray-600 justify-start text-[13px] bg-primary/5 w-max p-1 flex gap-1 items-center">
+                            <LocateFixed size={14} /> Live Tracking
+                            </h2>
+                          </div>
                           <div className="w-[20%]">
-                            <h2 className="flex gap-2 font-bold items-center text-xl">
-                            <DateFormatter dateString={schedule.travel_date} />, {schedule.dep_time}, {boardingStages[0].cityName}
-                            </h2>
+                            {/* <h2 className="text-gray-500 justify-start text-xs">
+                            {formatDateToIST(schedule.main_dep_time)},{" "}
+                            {boardingStages[0].cityName}
+                            </h2> */}
                           </div>
-                          <div className="w-[15%]">
-                            <h2 className="flex gap-1 font-bold items-center">
-                              <div className="w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[8px] border-l-green-500"></div>
-                              <span className="h-[1px] w-[30px] bg-red block border border-green-500"></span>
-                              {schedule.duration}HRS
-                              <span className="h-[1px] w-[30px] bg-red block border border-red-500"></span>
-                              <span className="h-[10px] w-[10px] bg-red-500 block border border-red-500"></span>
-                            </h2>
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
+                              Reaches on
+                            </h2> */}
                           </div>
-                          <div className="w-[28%]">
-                            <h2 className="flex gap-2 font-bold items-center ">
-                              {/* {formatDateToIST(schedule.main_dep_time)},{" "} */}
-                             
-                              <span className="text-xl">
-                                {schedule.arr_time},{" "}
-                                {dropoffStages.at(-1)?.cityName}
-                              </span>
-                            </h2>
+                          <div className="w-[20%]">
+                            {/* <h2 className="text-gray-500 justify-start text-xs">
+                            {dropoffStages.at(-1)?.cityName}
+                            </h2> */}
                           </div>
-                          {/* <div className="w-[23%]">
-                            <h2 className="font-bold items-center">
-                              {schedule.via}
-                            </h2>
-                          </div> */}
-                          <div className="w-[15%] text-right text-lg">
-                            <h2 className="font-bold items-center">
-                              {schedule.available_seats}
-                            </h2>
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
+                              Reaches on
+                            </h2> */}
+                          </div>
+                          <div className="w-[20%]">
+                            {/* <h2 className="flex gap-2 font-bold items-center">
+                              Reaches on
+                            </h2> */}
                           </div>
                         </div>
+                      
 
                         {/* Options Section */}
-                        <div className="flex justify-between mt-4">
+                        <div className="flex justify-end mt-4 items-center">
                           {options.map((item) => (
                             <div key={item}>
                               {item !== "Select Berth" && (
                                 <button
                                   onClick={() => handleClick(schedule.id, item)}
                                   className={cn(
-                                    "w-full text-left text-sm py-2 px-4 mb-2 flex gap-0 items-center justify-center text-secondary bg-primary/5 rounded-2xl",
+                                    "w-full text-left text-xs py-2 px-2 mb-2 flex gap-0 items-center justify-center text-secondary bg-primary/0 rounded-sm",
                                     openItems[schedule.id] === item &&
-                                      "bg-secondary/10 font-semibold"
+                                      "bg-secondary/10 font-semibold text-primary"
                                   )}
                                 >
                                   {item}{" "}
@@ -243,9 +264,9 @@ const SearchResultConatiner = () => {
                                   disabled={!schedule.available_seats}
                                   onClick={() => handleClick(schedule.id, item)}
                                   className={cn(
-                                    "w-full text-left p-2 mb-2 flex gap-2 items-center justify-center text-secondary bg-primary text-white font-bold rounded-md",
+                                    "w-full text-left px-2 py-1 text-sm mb-2 flex gap-2 items-center justify-center text-secondary bg-primary text-white font-normal rounded-sm",
                                     {
-                                      "cursor-not-allowed bg-zinc-400":
+                                      "cursor-not-allowed bg-zinc-500":
                                         !schedule.available_seats,
                                     }
                                   )}
@@ -259,8 +280,8 @@ const SearchResultConatiner = () => {
 
                         {/* Conditional Rendering */}
                         {openItems[schedule.id] && (
-                          <div className="bg-secondary/10 p-4">
-                            <p>Details for: {openItems[schedule.id]}</p>
+                          <div className="bg-[#f8f9fa] p-4 -mx-[12px]">
+                            {/* <p>Details for: {openItems[schedule.id]}</p> */}
                             <AdditionalBusInfo
                               scheduleId={schedule.id.toString()}
                               openItem={openItems[schedule.id]}

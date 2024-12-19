@@ -169,4 +169,45 @@
   height: initial;
   background: rgb(30, 178, 75);
 }
+.searhPageCitySelect > div {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
 
+}
+
+.searhPageCitySelect > div:first-child {
+  background: none;
+  padding-left: 5px;
+  padding-bottom: 1px;
+}
+
+.searhPageCitySelect .selectedText {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.searchPageDatePicker {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  background: none;
+  padding-left: 5px;
+  
+}
+
+.searchPageDatePicker .clIcon{
+display: none;
+}
+
+.searchPageDatePicker div {
+  font-weight: bold;
+  color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
+.searchPageDatePicker div > span {
+  font-weight: normal;
+  margin-bottom: 5px;
+}

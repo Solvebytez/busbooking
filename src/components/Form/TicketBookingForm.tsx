@@ -76,6 +76,8 @@ const TicketBookingForm = () => {
  
   };
 
+  console.log("allcities",allcities)
+
   const onSubmit = (data: TicketBookingFormProps) => {
  
 
@@ -156,7 +158,7 @@ window.location.href = `/search?${queryParams.toString()}`;
     setCustomValue("isSingleLady", !singleLady); // Update form state in React Hook Form
   };
 
-  if (isError) {
+  if (isError && !allcities ) {
    return  <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-lg relative w-full">
    <div className="w-full">
      Failed To Load Cities. We will get back in few minutes
@@ -164,7 +166,7 @@ window.location.href = `/search?${queryParams.toString()}`;
  </div>
   }
 
-  if (isLoading) {
+  if (isLoading || !allcities) {
     return (
       <div className="bg-white p-5 m-auto flex flex-col justify-center items-center rounded-lg relative w-full">
         <div className="w-full">

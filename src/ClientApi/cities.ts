@@ -7,7 +7,7 @@ export const useGetAllCities = () => {
       queryKey: ['all-cities'],
       queryFn: async () => {
         const response = await axiosInstance.post('bus/cities/get');
-        return response.data; // Return only the data
+        return response.data??[]; // Return only the data
       },
       staleTime: 1000 * 60 * 15, // 5 minutes
     });

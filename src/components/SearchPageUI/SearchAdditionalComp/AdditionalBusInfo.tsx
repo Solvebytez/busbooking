@@ -98,7 +98,7 @@ const AdditionalBusInfo = ({
         {boardingStages.map((stage) => (
           <div
             key={stage.time}
-            className="flex gap-3 items-center font-semibold"
+            className="flex gap-3 items-center font-normal text-sm mb-2"
           >
             <div className="w-[40%]">{stage.name}</div>
             <div className="flex gap-1 items-center">
@@ -112,54 +112,54 @@ const AdditionalBusInfo = ({
 
   if (openItem === BusOption.CANCELLATION_POLICY) {
     return (
-      <div className="bg-blue-50 p-5 rounded-md shadow-md">
-        <h2 className="text-lg font-bold mb-2">
+      <div className=" p-2 rounded-md shadow-md">
+        <h2 className="text-sm font-semibold mb-2">
           Trip Starts from: AGUMBE on 20:01, Fri 22 Nov
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-blue-100 text-left">
-                <th className="border-b p-2">Duration (Cancellation time)</th>
-                <th className="border-b p-2">Cancellation Fee</th>
-                <th className="border-b p-2">Remarks</th>
+                <th className="border-b p-2 text-sm">Duration (Cancellation time)</th>
+                <th className="border-b p-2 text-sm">Cancellation Fee</th>
+                <th className="border-b p-2 text-sm">Remarks</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   Up to 72 hours before the departure time
                 </td>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   10% of basic fare + Reservation fee
                 </td>
-                <td className="border-b p-2"></td>
+                <td className="border-b p-2 text-xs"></td>
               </tr>
               <tr>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   Between 72 hours and up to 24 hours before departure time
                 </td>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   25% of basic fare + Reservation fee
                 </td>
-                <td className="border-b p-2"></td>
+                <td className="border-b p-2 text-xs"></td>
               </tr>
               <tr>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   Between 24 hours and up to 2 hours before departure time
                 </td>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   50% of basic fare + Reservation fee
                 </td>
-                <td className="border-b p-2"></td>
+                <td className="border-b p-2 text-xs"></td>
               </tr>
               <tr>
-                <td className="border-b p-2">
+                <td className="border-b p-2 text-xs">
                   Less than 2 hours before departure time and at/after the
                   departure time
                 </td>
-                <td className="border-b p-2">100% of basic fare + Other fee</td>
-                <td className="border-b p-2">NO REFUND</td>
+                <td className="border-b p-2 text-xs">100% of basic fare + Other fee</td>
+                <td className="border-b p-2 text-xs">NO REFUND</td>
               </tr>
             </tbody>
           </table>
@@ -178,7 +178,7 @@ const AdditionalBusInfo = ({
         {dropingStages.map((stage) => (
           <div
             key={stage.time}
-            className="flex gap-3 items-center font-semibold"
+            className="flex gap-3 items-center font-normal text-sm mb-2"
           >
             <div className="w-[40%]">{stage.name}</div>
             <div className="flex gap-1 items-center">

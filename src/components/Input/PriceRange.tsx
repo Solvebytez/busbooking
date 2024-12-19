@@ -46,28 +46,30 @@ export default function PriceRangeFilter() {
   }
 
   return (
-    <div className="mb-4 bg-secondary/15 px-2 py-2 rounded-sm">
+    <div className="mb-4 px-0 py-2 rounded-sm">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="font-semibold text-secondary">Price Range</h3>
+        <h3 className="font-semibold uppercase text-[13px] text-gray-700">Price Range</h3>
       </div>
       <div className="flex w-full flex-col">
-        <div className="flex justify-between text-secondary font-semibold mt-2 w-full my-4">
-          <div className="border border-secondary flex items-center justify-center w-[30%] h-[45px] rounded-sm">
+        <div className="flex justify-between text-secondary font-semibold mt-2 w-full my-4 text-[13px]">
+          <div className="border border-gray-400 flex items-center justify-center w-[25%] h-[32px] rounded-xs">
             <IndianRupee size={14} />
             <input
               value={minPrice}
               onChange={(e) => handleInputChange(0, e.target.value)}
               type="text"
-              className="text-center rounded-sm w-[100%] h-full focus:border-none border-none focus:outline-none !focus-visible:ring-0 px-2"
+              className="text-center rounded-sm w-[100%] h-full focus:border-none border-none focus:outline-none !focus-visible:ring-0 px-2 text-gray-600"
+              readOnly
             />
           </div>
-          <div className="border border-secondary flex items-center justify-center w-[30%] rounded-sm">
+          <div className="border border-gray-400 flex items-center justify-center w-[22%] h-[32px] rounded-xs">
             <IndianRupee size={14} />
             <input
               value={maxPrice}
               onChange={(e) => handleInputChange(1, e.target.value)}
               type="text"
-              className="text-center rounded-sm w-[100%] h-full focus:border-none border-none focus:outline-none !focus-visible:ring-0 px-2"
+             className="text-center rounded-sm w-[100%] h-full focus:border-none border-none focus:outline-none !focus-visible:ring-0 px-2 text-gray-600"
+             readOnly
             />
           </div>
         </div>
@@ -80,7 +82,7 @@ export default function PriceRangeFilter() {
           max={10000}
           step={1}
         />
-        <div className="flex justify-between text-secondary font-semibold mt-2">
+        <div className="flex justify-between text-secondary font-semibold mt-2 text-[13px]">
           <span>{minPrice}</span>
           <span>{maxPrice}</span>
         </div>

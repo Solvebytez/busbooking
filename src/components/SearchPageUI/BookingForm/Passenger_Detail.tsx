@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -20,6 +21,8 @@ import { usePriceStore } from "@/store/store_price";
 import useSearchParamsStore from "@/store/useSearchParamsStore";
 import { TripType } from "@/components/Form/TicketBookingForm";
 import { useRouter } from "next/navigation";
+import { DetailsModal } from "./DetailsModal";
+import { useState } from "react";
 
 // Schema for additional passengers (optional fields)
 const additionalPassengerSchema = z.object({
@@ -40,10 +43,12 @@ const firstPassengerSchema = z.object({
   seat_no: z.string(),
   name: z.string().min(1, "Name is required"),
   gender: z.string().min(1, "Gender is required"),
-  age: z.number({
-    required_error: "Age is required",
-    invalid_type_error: "Age must be a number",
-  }).min(1, "Age must be at least 1"),
+  age: z
+    .number({
+      required_error: "Age is required",
+      invalid_type_error: "Age must be a number",
+    })
+    .min(1, "Age must be at least 1"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   seat_price: z.number(),
@@ -53,24 +58,59 @@ const firstPassengerSchema = z.object({
 });
 
 const formSchema = z.object({
-  passengers: z.array(z.union([
-    firstPassengerSchema,
-    additionalPassengerSchema
-  ])).refine((data) => {
-    // Ensure at least the first passenger's data is filled
+  passengers: z.array(
+    z.union([firstPassengerSchema, additionalPassengerSchema])
+  ).superRefine((data, ctx) => {
+    // Only validate the first passenger
+    if (data.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "First passenger's details are required",
+        path: [0],
+      });
+      return;
+    }
+
     const firstPassenger = data[0];
-    return firstPassenger && 
-           firstPassenger.name && 
-           firstPassenger.gender && 
-           firstPassenger.age && 
-           firstPassenger.city && 
-           firstPassenger.state;
-  }, {
-    message: "At least One passenger details are required"
-  })
+    if (!firstPassenger.name) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Name is required",
+        path: [0, "name"],
+      });
+    }
+    if (!firstPassenger.gender) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Gender is required",
+        path: [0, "gender"],
+      });
+    }
+    if (!firstPassenger.age || firstPassenger.age < 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Age must be at least 1",
+        path: [0, "age"],
+      });
+    }
+    if (!firstPassenger.city) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "City is required",
+        path: [0, "city"],
+      });
+    }
+    if (!firstPassenger.state) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "State is required",
+        path: [0, "state"],
+      });
+    }
+  }),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>;
 
 const Passenger_DetailForm = ({
   selectedSeats,
@@ -84,6 +124,7 @@ const Passenger_DetailForm = ({
   const { data: seatData, subTotal, totalGst, totalSeatPrice } = usePriceStore();
   const onwordsSearch = useSearchParamsStore();
   const router = useRouter();
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const {
     control,
@@ -115,8 +156,6 @@ const Passenger_DetailForm = ({
   const onSubmit = (data: FormValues, type: TripType) => {
     toast.success("Form Submitted successfully!");
 
-
-    
     if (
       typeof window !== "undefined" &&
       (window.localStorage.getItem("one_way") ||
@@ -180,22 +219,13 @@ const Passenger_DetailForm = ({
 
   const getErrorMessages = () => {
     const errorMessages: string[] = [];
-    if (errors.passengers) {
+    if (errors.passengers?.[0]) {
       // Only show errors for the first passenger
-      const firstPassengerErrors = errors.passengers[0];
-      if (firstPassengerErrors && typeof firstPassengerErrors === "object") {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        Object.entries(firstPassengerErrors).forEach(([_, errorValue]) => {
-          if (
-            errorValue &&
-            typeof errorValue === "object" &&
-            "message" in errorValue &&
-            typeof errorValue.message === "string"
-          ) {
-            errorMessages.push(errorValue.message);
-          }
-        });
-      }
+      Object.values(errors.passengers[0]).forEach((error: any) => {
+        if (error?.message) {
+          errorMessages.push(error.message);
+        }
+      });
     }
     return errorMessages;
   };
@@ -205,12 +235,12 @@ const Passenger_DetailForm = ({
   const handleFormSubmit = (data: FormValues) => {
     if (isPassengerDetailHas && onwordsSearch.tripType !== "one_way") {
       if (onwordsSearch.tripType === "round_trip" && onwordsSearch.returnDate) {
-        onSubmit(data, "round_trip" as TripType);
+        setShowDetailsModal(true);
       } else {
         onSaveData(data);
       }
     } else if (onwordsSearch.tripType === "one_way") {
-      onSubmit(data, "one_way" as TripType);
+      setShowDetailsModal(true);
     } else {
       onSaveData(data);
     }
@@ -245,8 +275,12 @@ const Passenger_DetailForm = ({
               <Input
                 {...field}
                 placeholder="Enter Name"
-                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.name}
+                className={cn(
+                  "h-12 w-full rounded-sm transition-colors border-2",
+                  index === 0 && errors.passengers?.[0]?.name
+                    ? "border-red-500"
+                    : "border-gray-400"
+                )}
               />
             )}
           />
@@ -257,8 +291,12 @@ const Passenger_DetailForm = ({
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger
-                  className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                  aria-invalid={index === 0 && !!errors.passengers?.[0]?.gender}
+                  className={cn(
+                    "h-12 w-full rounded-sm transition-colors border-2",
+                    index === 0 && errors.passengers?.[0]?.gender
+                      ? "border-red-500"
+                      : "border-gray-400"
+                  )}
                 >
                   <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>
@@ -279,10 +317,16 @@ const Passenger_DetailForm = ({
                 {...field}
                 type="number"
                 placeholder="Age"
-                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.age}
+                className={cn(
+                  "h-12 w-full rounded-sm transition-colors border-2",
+                  index === 0 && errors.passengers?.[0]?.age
+                    ? "border-red-500"
+                    : "border-gray-400"
+                )}
                 onChange={(e) =>
-                  field.onChange(e.target.value ? parseInt(e.target.value, 10) : 0)
+                  field.onChange(
+                    e.target.value ? parseInt(e.target.value, 10) : undefined
+                  )
                 }
               />
             )}
@@ -295,8 +339,12 @@ const Passenger_DetailForm = ({
               <Input
                 {...field}
                 placeholder="Enter City"
-                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.city}
+                className={cn(
+                  "h-12 w-full rounded-sm transition-colors border-2",
+                  index === 0 && errors.passengers?.[0]?.city
+                    ? "border-red-500"
+                    : "border-gray-400"
+                )}
               />
             )}
           />
@@ -308,8 +356,12 @@ const Passenger_DetailForm = ({
               <Input
                 {...field}
                 placeholder="Enter State"
-                className="h-12 w-full rounded-sm transition-colors border-2 border-gray-400"
-                aria-invalid={index === 0 && !!errors.passengers?.[0]?.state}
+                className={cn(
+                  "h-12 w-full rounded-sm transition-colors border-2",
+                  index === 0 && errors.passengers?.[0]?.state
+                    ? "border-red-500"
+                    : "border-gray-400"
+                )}
               />
             )}
           />
@@ -339,7 +391,7 @@ const Passenger_DetailForm = ({
       ))}
 
       {/* Error messages section */}
-      {errors.passengers && (
+      {getErrorMessages().length > 0 && (
         <div
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
           role="alert"
@@ -362,7 +414,7 @@ const Passenger_DetailForm = ({
           className="w-full bg-primary hover:bg-orange-700 text-white"
           type="submit"
         >
-          Click here to procced
+          Click here to proceed
         </Button>
       ) : (
         <Button
@@ -373,6 +425,14 @@ const Passenger_DetailForm = ({
           Proceed To Checkout
         </Button>
       )}
+      <DetailsModal
+        showDetailsModal={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        formData={control._formValues as FormValues}
+        submitOnCheckout={(data) =>
+          onSubmit(data, onwordsSearch.tripType as TripType)
+        }
+      />
     </form>
   );
 };

@@ -17,6 +17,7 @@ const SearchableDropdown = ({
   labelText2,
   isError,
   isDisabled,
+  classes,
 }: {
   cities: CityPropsType[]
   values: CityPropsType | null
@@ -24,7 +25,8 @@ const SearchableDropdown = ({
   lebelText1: string
   labelText2: string
   isError?: string
-  isDisabled?: boolean
+  isDisabled?: boolean,
+  classes?:string
 }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [showDropdown, setShowDropdown] = useState(false)
@@ -72,7 +74,7 @@ const SearchableDropdown = ({
   }, [handleClickOutside])
 
   return (
-    <div className="relative w-full">
+    <div className={cn(`relative w-full`,classes)}>
       <div
         ref={dropdownRef}
         onClick={() => !isDisabled && setShowDropdown(true)}
@@ -83,10 +85,10 @@ const SearchableDropdown = ({
           isDisabled && "cursor-not-allowed pointer-events-none opacity-45"
         )}
       >
-        <span className={cn("text-gray-500 text-xs", isError && "text-red-600")}>
+        <span className={cn("regularTaxt text-gray-500 text-xs", isError && "text-red-600")}>
           {labelText2} {isError && "- Required*"}
         </span>
-        <span className="text-gray-900 w-[150px] line-clamp-1">
+        <span className="text-gray-900 w-[150px] line-clamp-1 selectedText">
           {values?.city_name || lebelText1}
         </span>
       </div>

@@ -119,8 +119,8 @@ const useFilterData = (filterData: FilterData) => {
 
   const queryFn = async () => {
     try {
-      const response = await axiosInstance.post<FilterResponse>('bus/schedules/list/', filterData);
-      return response.data;
+      const response = await axiosInstance.post<FilterResponse>('bus/schedules/list', filterData);
+      return response.data??[];
     } catch (error) {
       throw new Error('Error fetching filtered data');
     }
@@ -130,6 +130,7 @@ const useFilterData = (filterData: FilterData) => {
     queryKey,
     queryFn,
     select: (data) => {
+      console.log("data",data)
       const fareAnalysis = analyzeFares(data.data);
       return {
         ...data,

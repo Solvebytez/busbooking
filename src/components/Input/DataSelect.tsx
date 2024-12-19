@@ -80,7 +80,7 @@ export default function DatePickerWithTwoMonths({
             isError && "text-red-600 border-red-600",
           )}
         >
-          <CalendarIcon className="mr-2 h-6 w-6 text-primary" />
+          <CalendarIcon className="mr-2 h-6 w-6 text-primary clIcon" />
           <div className="flex flex-col gap-[2px] text-red-600">
             <span className={cn("text-gray-500 text-xs", isError && "text-red-600")}>
               {textLabel1} {isError && "- Required*"}

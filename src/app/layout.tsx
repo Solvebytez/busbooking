@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Lato } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import QueryProvider from "./QueryProvider";
 
-const space_Grotesk = Lato({
+const space_Grotesk = Montserrat({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "700", "300", "900"],
   variable: "--font-space-grotesk",

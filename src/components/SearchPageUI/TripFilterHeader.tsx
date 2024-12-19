@@ -3,21 +3,24 @@
 import { cn } from "@/lib/utils";
 import useOnwardTripStore from "@/store/onwardTripStore";
 import useSearchParamsStore from "@/store/useSearchParamsStore";
-import {
-  ArrowDownUp,
-
-  ChevronsUpDown,
-} from "lucide-react";
-
+// import { ArrowDownUp, ChevronsUpDown } from "lucide-react";
 import { useEffect } from "react";
 import { TripType } from "../Form/TicketBookingForm";
-
 import { format } from "date-fns";
 
-const TripFilterHeader = () => {
-  const {  setOnwardTrip, parsedOnwardTrip, setParsedOnwardTrip } = useOnwardTripStore();
+
+const labels = [
+  "Departure Time",
+  "Journey Duration",
+  "Arrival Time",
+  "Seat Fare",
+  "Available Seats",
+];
+
+const TripFilterHeader = ({schedulesListCount=0}:{schedulesListCount:number|string}) => {
+  const { setOnwardTrip, parsedOnwardTrip, setParsedOnwardTrip } =
+    useOnwardTripStore();
   const state = useSearchParamsStore();
-  
 
   useEffect(() => {
     const savedData = localStorage.getItem("Onward_Trip");
@@ -32,13 +35,12 @@ const TripFilterHeader = () => {
     }
   }, [setOnwardTrip, setParsedOnwardTrip]);
 
-  const isPassengerDetailHas = Object.keys(parsedOnwardTrip).length > 0?true:false;
-
-
+  const isPassengerDetailHas =
+    Object.keys(parsedOnwardTrip).length > 0 ? true : false;
 
   return (
-    <div className="p-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
-      <div className="w-full md:px-[1rem] xl:px-[4rem]">
+    <div className="pb-4 pt-5 m-auto flex flex-col justify-center items-center rounded-tr-lg rounded-br-lg rounded-bl-lg relative w-full">
+      <div className="w-full md:px-[1rem] xl:px-[0rem]">
         <div className="space-y-4">
           {/* Trip Details */}
           <div className="flex justify-between space-x-2">
@@ -47,30 +49,32 @@ const TripFilterHeader = () => {
                 Onward Trip: Achampet - Srisailam, 15 Nov
               </button> */}
               <button
-                className={cn(
-                  "font-semibold px-4 py-2 rounded-full",
-                  {
-                    "cursor-not-allowed bg-gray-300 text-secondary": isPassengerDetailHas, // Style when disabled
-                    "bg-secondary text-white": !isPassengerDetailHas, // Style when active
-                  }
-                )}
+                className={cn("font-semibold px-4 py-2 rounded-sm text-sm", {
+                  "cursor-not-allowed bg-gray-300 text-secondary":
+                    isPassengerDetailHas, // Style when disabled
+                  "bg-secondary text-white": !isPassengerDetailHas, // Style when active
+                })}
                 disabled={!isPassengerDetailHas}
               >
-                Onward Trip: {state.fromCity} - {state.toCity}, {state.departureDate && format(state.departureDate, "MMM do, yyyy")}
+                Onward Trip: {state.fromCity} - {state.toCity},{" "}
+                {state.departureDate &&
+                  format(state.departureDate, "MMM do, yyyy")}
               </button>
-              {state.returnDate && state.tripType===TripType.round_trip &&  <button
-                className={cn(
-                  "text-gray-700 font-semibold px-4 py-2 rounded-full",
-                  {
-                    "cursor-not-allowed bg-gray-300": !isPassengerDetailHas, // Style when disabled
-                    "bg-secondary text-white": isPassengerDetailHas, // Style when active
-                  }
-                )}
-                disabled={!isPassengerDetailHas}
-              >
-                Return Trip: {state.toCity} - {state.fromCity}, {state.returnDate && format(state.returnDate, "PPP")}
-              </button>}
-             
+              {state.returnDate && state.tripType === TripType.round_trip && (
+                <button
+                  className={cn(
+                    "text-gray-700 font-semibold px-4 py-2 rounded-sm text-sm",
+                    {
+                      "cursor-not-allowed bg-gray-200 opacity-65": !isPassengerDetailHas, // Style when disabled
+                      "bg-secondary text-white": isPassengerDetailHas, // Style when active
+                    }
+                  )}
+                  disabled={!isPassengerDetailHas}
+                >
+                  Return Trip: {state.toCity} - {state.fromCity},{" "}
+                  {state.returnDate && format(state.returnDate, "PPP")}
+                </button>
+              )}
             </div>
             <div className="flex space-x-2">
               {/* <button
@@ -89,40 +93,32 @@ const TripFilterHeader = () => {
           </div>
 
           {/* Sort and Navigation */}
-          <div className="bg-secondary/15 rounded-lg p-4 shadow-sm">
-            <div className="flex justify-between items-center font-semibold">
+          <div className="bg-secondary/0 rounded-sm p-1">
+            <div className="flex justify-start items-center font-semibold">
               {/* Sort Options */}
-              <button className="flex items-center space-x-1 text-gray-700 ">
-                <span className="material-icons">
-                  {" "}
-                  <ArrowDownUp size={16} />
-                </span>
-                <span>Sort By</span>
-              </button>
-              <button className="flex items-center">
-                <span>Departure Time</span>
-                <span className="material-icons">
-                  <ChevronsUpDown size={16} />
-                </span>
-              </button>
-              <button className="flex items-center ">
-                <span>Journey Duration</span>
-                <span className="material-icons">
-                  <ChevronsUpDown size={16} />
-                </span>
-              </button>
-              <button className="flex items-center ">
-                <span>Arrival Time</span>
-                <span className="material-icons">
-                  <ChevronsUpDown size={16} />
-                </span>
-              </button>
-              <button className="flex items-center">
-                <span>Seat Fare</span>
-                <span className="material-icons">
-                  <ChevronsUpDown size={16} />
-                </span>
-              </button>
+              <div className="w-[37%] flex justify-between  items-center">
+                <button className="flex items-center space-x-1 text-gray-700 text-xs uppercase">
+                  {schedulesListCount} Buses found
+                </button>
+                <button className="flex items-center space-x-1 text-gray-700 text-xs uppercase pr-[3rem]">
+                  <span className="material-icons">
+                    {" "}
+                    {/* <ArrowDownUp size={16} /> */}
+                  </span>
+                  <span>Sort By:</span>
+                </button>
+              </div>
+              {labels.map((label, index) => (
+                <button
+                  key={index}
+                  className="flex items-center text-gray-700 text-xs font-normal w-[20%]"
+                >
+                  <span>{label}</span>
+                  <span className="material-icons">
+                    {/* <ChevronsUpDown size={16} /> */}
+                  </span>
+                </button>
+              ))}
 
               {/* Navigation Buttons */}
             </div>

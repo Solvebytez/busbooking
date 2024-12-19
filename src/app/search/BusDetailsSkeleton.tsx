@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 function BusDetailsSkeleton() {
   return (
-    <div className="w-full shadow-md bg-white rounded mx-auto p-4 space-y-4 border-b last:border-b-0">
+    <div className="w-full shadow-none bg-white rounded mx-auto p-4 space-y-4 border last:border-b-0">
       {/* Header Section */}
       <div className="flex justify-between items-start">
         <div className="space-y-2">
@@ -46,7 +46,7 @@ function BusDetailsSkeleton() {
 
 export default function BusSkeletonList() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {[...Array(5)].map((_, index) => (
         <BusDetailsSkeleton key={index} />
       ))}
